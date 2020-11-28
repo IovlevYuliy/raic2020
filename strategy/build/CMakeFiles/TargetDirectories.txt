@@ -1,0 +1,3 @@
+/home/yuliy/Desktop/raic2020/strategy/build/CMakeFiles/rebuild_cache.dir
+/home/yuliy/Desktop/raic2020/strategy/build/CMakeFiles/edit_cache.dir
+/home/yuliy/Desktop/raic2020/strategy/build/CMakeFiles/aicup2020.dir
