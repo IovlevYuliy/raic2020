@@ -1,7 +1,7 @@
 #ifndef _MODEL_DEBUG_STATE_HPP_
 #define _MODEL_DEBUG_STATE_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "Camera.hpp"
 #include "Vec2Float.hpp"
 #include "Vec2Int.hpp"

@@ -7,8 +7,12 @@ if(WIN32)
     SET(PROJECT_LIBS Ws2_32.lib)
 endif()
 
-file(GLOB HEADERS "*.hpp" "model/*.hpp")
+set(CMAKE_CXX_STANDARD 17)
+
+file(GLOB HEADERS "*.hpp" "model/*.hpp" "stream/*.hpp")
+file(GLOB SRC "*.cpp" "model/*.cpp" "stream/*.cpp")
+
 SET_SOURCE_FILES_PROPERTIES(${HEADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
-file(GLOB SRC "*.cpp" "model/*.cpp")
+
 add_executable(aicup2020 ${HEADERS} ${SRC})
 TARGET_LINK_LIBRARIES(aicup2020 ${PROJECT_LIBS})

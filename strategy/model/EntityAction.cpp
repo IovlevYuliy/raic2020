@@ -1,7 +1,19 @@
 #include "EntityAction.hpp"
 
 EntityAction::EntityAction() { }
-EntityAction::EntityAction(std::shared_ptr<MoveAction> moveAction, std::shared_ptr<BuildAction> buildAction, std::shared_ptr<AttackAction> attackAction, std::shared_ptr<RepairAction> repairAction) : moveAction(moveAction), buildAction(buildAction), attackAction(attackAction), repairAction(repairAction) { }
+
+EntityAction::EntityAction(
+    std::shared_ptr<MoveAction> moveAction,
+    std::shared_ptr<BuildAction> buildAction,
+    std::shared_ptr<AttackAction> attackAction,
+    std::shared_ptr<RepairAction> repairAction) : moveAction(moveAction), buildAction(buildAction), attackAction(attackAction), repairAction(repairAction) { }
+
+EntityAction::EntityAction(std::shared_ptr<MoveAction> moveAction) : moveAction(moveAction) { }
+EntityAction::EntityAction(std::shared_ptr<BuildAction> buildAction) : buildAction(buildAction) { }
+EntityAction::EntityAction(
+    std::shared_ptr<MoveAction> moveAction,
+    std::shared_ptr<AttackAction> attackAction) : moveAction(moveAction), attackAction(attackAction) { }
+
 EntityAction EntityAction::readFrom(InputStream& stream) {
     EntityAction result;
     if (stream.readBool()) {

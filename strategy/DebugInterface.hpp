@@ -1,7 +1,7 @@
 #ifndef _DEBUG_INTERFACE_HPP_
 #define _DEBUG_INTERFACE_HPP_
 
-#include "Stream.hpp"
+#include "stream/Stream.hpp"
 #include "model/DebugCommand.hpp"
 #include "model/DebugState.hpp"
 #include <memory>

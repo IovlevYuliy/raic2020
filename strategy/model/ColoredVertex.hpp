@@ -1,7 +1,7 @@
 #ifndef _MODEL_COLORED_VERTEX_HPP_
 #define _MODEL_COLORED_VERTEX_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "Color.hpp"
 #include "Vec2Float.hpp"
 #include <memory>

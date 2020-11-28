@@ -2,7 +2,7 @@
 #define _MODEL_DEBUG_COMMAND_HPP_
 
 #include <memory>
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "Color.hpp"
 #include "ColoredVertex.hpp"
 #include "DebugData.hpp"

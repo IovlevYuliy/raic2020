@@ -2,7 +2,7 @@
 #define _MODEL_CLIENT_MESSAGE_HPP_
 
 #include <memory>
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "Action.hpp"
 #include "AttackAction.hpp"
 #include "AutoAttack.hpp"

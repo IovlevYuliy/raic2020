@@ -1,9 +1,10 @@
 #ifndef _MODEL_ENTITY_TYPE_HPP_
 #define _MODEL_ENTITY_TYPE_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 
 enum EntityType {
+    ALL = -1,
     WALL = 0,
     HOUSE = 1,
     BUILDER_BASE = 2,

@@ -1,7 +1,7 @@
 #ifndef _MODEL_PLAYER_VIEW_HPP_
 #define _MODEL_PLAYER_VIEW_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "AttackProperties.hpp"
 #include "BuildProperties.hpp"
 #include "Entity.hpp"

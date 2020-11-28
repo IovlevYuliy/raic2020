@@ -1,7 +1,7 @@
 #ifndef _MODEL_BUILD_PROPERTIES_HPP_
 #define _MODEL_BUILD_PROPERTIES_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "EntityType.hpp"
 #include <memory>
 #include <stdexcept>

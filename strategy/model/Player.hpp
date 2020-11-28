@@ -1,7 +1,7 @@
 #ifndef _MODEL_PLAYER_HPP_
 #define _MODEL_PLAYER_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include <string>
 
 class Player {

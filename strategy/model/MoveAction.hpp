@@ -1,7 +1,7 @@
 #ifndef _MODEL_MOVE_ACTION_HPP_
 #define _MODEL_MOVE_ACTION_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "Vec2Int.hpp"
 #include <stdexcept>
 #include <string>

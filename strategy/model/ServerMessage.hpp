@@ -2,7 +2,7 @@
 #define _MODEL_SERVER_MESSAGE_HPP_
 
 #include <memory>
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "AttackProperties.hpp"
 #include "BuildProperties.hpp"
 #include "Entity.hpp"

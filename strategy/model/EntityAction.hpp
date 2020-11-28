@@ -1,7 +1,7 @@
 #ifndef _MODEL_ENTITY_ACTION_HPP_
 #define _MODEL_ENTITY_ACTION_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "AttackAction.hpp"
 #include "AutoAttack.hpp"
 #include "BuildAction.hpp"
@@ -20,8 +20,23 @@ public:
     std::shared_ptr<BuildAction> buildAction;
     std::shared_ptr<AttackAction> attackAction;
     std::shared_ptr<RepairAction> repairAction;
+
     EntityAction();
-    EntityAction(std::shared_ptr<MoveAction> moveAction, std::shared_ptr<BuildAction> buildAction, std::shared_ptr<AttackAction> attackAction, std::shared_ptr<RepairAction> repairAction);
+
+    EntityAction(
+        std::shared_ptr<MoveAction> moveAction,
+        std::shared_ptr<BuildAction> buildAction,
+        std::shared_ptr<AttackAction> attackAction,
+        std::shared_ptr<RepairAction> repairAction);
+
+    EntityAction(
+        std::shared_ptr<MoveAction> moveAction,
+        std::shared_ptr<AttackAction> attackAction);
+
+    EntityAction(std::shared_ptr<BuildAction> buildAction);
+
+    EntityAction(std::shared_ptr<MoveAction> moveAction);
+
     static EntityAction readFrom(InputStream& stream);
     void writeTo(OutputStream& stream) const;
 };

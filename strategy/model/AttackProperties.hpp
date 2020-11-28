@@ -1,7 +1,7 @@
 #ifndef _MODEL_ATTACK_PROPERTIES_HPP_
 #define _MODEL_ATTACK_PROPERTIES_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include <string>
 
 class AttackProperties {

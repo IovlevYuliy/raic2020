@@ -1,7 +1,7 @@
 #ifndef _MODEL_CAMERA_HPP_
 #define _MODEL_CAMERA_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "Vec2Float.hpp"
 #include <stdexcept>
 #include <string>

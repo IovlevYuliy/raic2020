@@ -1,7 +1,7 @@
 #ifndef _MODEL_ENTITY_HPP_
 #define _MODEL_ENTITY_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "EntityType.hpp"
 #include "Vec2Int.hpp"
 #include <memory>

@@ -1,7 +1,7 @@
 #ifndef _MODEL_VEC2_INT_HPP_
 #define _MODEL_VEC2_INT_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include <string>
 
 class Vec2Int {

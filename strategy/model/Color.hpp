@@ -1,7 +1,7 @@
 #ifndef _MODEL_COLOR_HPP_
 #define _MODEL_COLOR_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include <string>
 
 class Color {

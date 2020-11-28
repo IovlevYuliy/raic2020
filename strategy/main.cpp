@@ -1,6 +1,6 @@
 #include "DebugInterface.hpp"
 #include "MyStrategy.hpp"
-#include "TcpStream.hpp"
+#include "stream/TcpStream.hpp"
 #include "model/Model.hpp"
 #include <memory>
 #include <string>

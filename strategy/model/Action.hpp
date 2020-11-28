@@ -1,7 +1,7 @@
 #ifndef _MODEL_ACTION_HPP_
 #define _MODEL_ACTION_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "AttackAction.hpp"
 #include "AutoAttack.hpp"
 #include "BuildAction.hpp"

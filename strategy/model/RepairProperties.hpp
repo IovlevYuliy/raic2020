@@ -1,7 +1,7 @@
 #ifndef _MODEL_REPAIR_PROPERTIES_HPP_
 #define _MODEL_REPAIR_PROPERTIES_HPP_
 
-#include "../Stream.hpp"
+#include "../stream/Stream.hpp"
 #include "EntityType.hpp"
 #include <stdexcept>
 #include <string>
