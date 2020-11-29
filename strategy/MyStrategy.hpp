@@ -23,6 +23,7 @@ public:
     uint usedPopulation;
     uint curBuilderCount;
     uint rangedBaseCount;
+    uint builderBaseCount;
     uint resources;
     vector<vector<char> >gameMap;
 

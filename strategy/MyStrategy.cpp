@@ -12,12 +12,14 @@ void MyStrategy::calcPopulationStats() {
     usedPopulation = 0;
     curBuilderCount = 0;
     rangedBaseCount = 0;
+    builderBaseCount = 0;
 
     for (auto& entry : myEntities) {
         totalPopulation += entityProperties[entry.entityType].populationProvide;
         usedPopulation += entityProperties[entry.entityType].populationUse;
         curBuilderCount += isBuilder(entry);
         rangedBaseCount += (entry.entityType == EntityType::RANGED_BASE);
+        builderBaseCount += (entry.entityType == EntityType::BUILDER_BASE);
     }
 }
 
@@ -80,6 +82,11 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
     if (resources > entityProperties[EntityType::RANGED_BASE].cost &&
             rangedBaseCount < MAX_RANGED_BASE) {
         buildingManager->createBuilding(myEntities, gameMap, actions, EntityType::RANGED_BASE);
+    }
+
+    if (resources > entityProperties[EntityType::BUILDER_BASE].cost &&
+            builderBaseCount < MAX_BUILDER_BASE) {
+        buildingManager->createBuilding(myEntities, gameMap, actions, EntityType::BUILDER_BASE);
     }
 
     buildingManager->repairBuildings(myEntities, actions);
