@@ -3,9 +3,9 @@
 
 #include "DebugInterface.hpp"
 #include "model/Model.hpp"
-#include "common.hpp"
-#include "UnitManager.hpp"
 #include "BuildingManager.hpp"
+#include "UnitManager.hpp"
+#include "common.hpp"
 
 class MyStrategy {
 public:

@@ -12,30 +12,27 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <optional>
 #include <vector>
 
 class EntityAction {
 public:
-    std::shared_ptr<MoveAction> moveAction;
-    std::shared_ptr<BuildAction> buildAction;
-    std::shared_ptr<AttackAction> attackAction;
-    std::shared_ptr<RepairAction> repairAction;
+    std::optional<MoveAction> moveAction;
+    std::optional<BuildAction> buildAction;
+    std::optional<AttackAction> attackAction;
+    std::optional<RepairAction> repairAction;
 
     EntityAction();
 
     EntityAction(
-        std::shared_ptr<MoveAction> moveAction,
-        std::shared_ptr<BuildAction> buildAction,
-        std::shared_ptr<AttackAction> attackAction,
-        std::shared_ptr<RepairAction> repairAction);
+        std::optional<MoveAction> moveAction,
+        std::optional<BuildAction> buildAction = {},
+        std::optional<AttackAction> attackAction = {},
+        std::optional<RepairAction> repairAction = {});
 
     EntityAction(
-        std::shared_ptr<MoveAction> moveAction,
-        std::shared_ptr<AttackAction> attackAction);
-
-    EntityAction(std::shared_ptr<BuildAction> buildAction);
-
-    EntityAction(std::shared_ptr<MoveAction> moveAction);
+        std::optional<MoveAction> moveAction,
+        std::optional<AttackAction> attackAction);
 
     static EntityAction readFrom(InputStream& stream);
     void writeTo(OutputStream& stream) const;

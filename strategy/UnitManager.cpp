@@ -31,12 +31,13 @@ void UnitManager::createBuilder(vector<Entity>& myEntities, unordered_map<int, E
         return;
     }
 
-    shared_ptr<BuildAction> buildAction(new BuildAction(
-        EntityType::BUILDER_UNIT,
-        Vec2Int(builderBase.position.x - 1, builderBase.position.y)
-    ));
-
-    actions[builderBase.id] = EntityAction(buildAction);
+    actions[builderBase.id] = EntityAction(
+        {}, // move
+        BuildAction(
+            EntityType::BUILDER_UNIT,
+            Vec2Int(builderBase.position.x - 1, builderBase.position.y)
+        )
+    );
 }
 
 void UnitManager::createRanger(vector<Entity>& myEntities,
@@ -45,10 +46,11 @@ void UnitManager::createRanger(vector<Entity>& myEntities,
         return entry.entityType == EntityType::RANGED_BASE;
     });
 
-    shared_ptr<BuildAction> buildAction(new BuildAction(
-        EntityType::RANGED_UNIT,
-        Vec2Int(rangerBase.position.x - 1, rangerBase.position.y)
-    ));
-
-    actions[rangerBase.id] = EntityAction(buildAction);
+    actions[rangerBase.id] = EntityAction(
+        {}, // move
+        BuildAction(
+            EntityType::RANGED_UNIT,
+            Vec2Int(rangerBase.position.x - 1, rangerBase.position.y)
+        )
+    );
 }

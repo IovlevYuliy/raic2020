@@ -11,8 +11,10 @@ public:
     Vec2Int();
     Vec2Int(int x, int y);
     static Vec2Int readFrom(InputStream& stream);
+    uint dist(const Vec2Int& to) const;
     void writeTo(OutputStream& stream) const;
     bool operator ==(const Vec2Int& other) const;
+
 };
 namespace std {
     template<>

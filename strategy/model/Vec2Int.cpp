@@ -12,9 +12,15 @@ void Vec2Int::writeTo(OutputStream& stream) const {
     stream.write(x);
     stream.write(y);
 }
+
+uint Vec2Int::dist(const Vec2Int& to) const {
+    return abs(x - to.x) + abs(y - to.y);
+}
+
 bool Vec2Int::operator ==(const Vec2Int& other) const {
     return x == other.x && y == other.y;
 }
+
 size_t std::hash<Vec2Int>::operator ()(const Vec2Int& value) const {
     size_t result = 0;
     result ^= std::hash<int>{}(value.x) + 0x9e3779b9 + (result<<6) + (result>>2);

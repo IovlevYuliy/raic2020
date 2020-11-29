@@ -47,24 +47,24 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
     unitManager->createUnit(myEntities, actions, EntityType::RANGED_UNIT);
 
     for (auto& entry : myEntities) {
-        shared_ptr<MoveAction> mvAction;
-        shared_ptr<AttackAction> attackAction;
+        optional<MoveAction> mvAction;
+        optional<AttackAction> attackAction;
 
         auto properties = &playerView.entityProperties.find(entry.entityType)->second;
         if (isUnit(entry)) {
-            mvAction = shared_ptr<MoveAction>(new MoveAction(
+            mvAction = MoveAction(
                 Vec2Int(playerView.mapSize - 1, playerView.mapSize - 1),
                 true,
                 true
-            ));
+            );
 
-            attackAction = shared_ptr<AttackAction>(new AttackAction(
+            attackAction = AttackAction(
                 NULL,
                 shared_ptr<AutoAttack>(new AutoAttack(
                     properties->sightRange,
                     isBuilder(entry) ? vector<EntityType>{ EntityType::RESOURCE }: vector<EntityType>()
                 ))
-            ));
+            );
 
 
             actions[entry.id] = EntityAction(mvAction, attackAction);
@@ -76,6 +76,8 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         restoreGameMap(playerView);
         buildingManager->createBuilding(myEntities, gameMap, actions, EntityType::HOUSE);
     }
+
+    buildingManager->repairBuildings(myEntities, actions);
 
     return Action(actions);
 }
