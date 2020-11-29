@@ -2,10 +2,11 @@
 
 AttackManager::AttackManager() {}
 
-void AttackManager::getAims(vector<Entity>& enemyEntities) {
+void AttackManager::getAims(vector<Entity>& enemyEntities, vector<Entity>& myEntities) {
     turrets.clear();
     bases.clear();
     others.clear();
+    myBases.clear();
 
     for (auto& entry : enemyEntities) {
         if (entry.entityType == EntityType::TURRET) {
@@ -20,6 +21,12 @@ void AttackManager::getAims(vector<Entity>& enemyEntities) {
 
         others.push_back(entry);
     }
+
+    for (auto& entry : myEntities) {
+        if (isBase(entry.entityType)) {
+            myBases.push_back(entry);
+        }
+    }
 }
 
 void AttackManager::goToAttack(Entity& myEntity, vector<vector<char>>& gameMap,
@@ -29,6 +36,20 @@ void AttackManager::goToAttack(Entity& myEntity, vector<vector<char>>& gameMap,
         return;
     }
     if (!troopIsReady(myEntity, gameMap)) {
+        return;
+    }
+
+    auto defPosition = needDefense();
+    if (defPosition) {
+        if (defPosition.value().dist(myEntity.position) < 2 * DEFENSE_THRESHOLD) {
+            actions[myEntity.id] = EntityAction(
+                MoveAction(defPosition.value(), true, false),
+                AttackAction(
+                    {},
+                    AutoAttack(entityProperties[myEntity.entityType].sightRange, vector<EntityType>())
+                )
+            );
+        }
         return;
     }
 
@@ -44,7 +65,7 @@ void AttackManager::goToAttack(Entity& myEntity, vector<vector<char>>& gameMap,
     }
 
     if (aim) {
-        auto mvAction = MoveAction(aim->position, true, true);
+        auto mvAction = MoveAction(aim->position, true, false);
         auto attackAction = AttackAction(
             {},
             AutoAttack(entityProperties[myEntity.entityType].sightRange, vector<EntityType>())
@@ -77,6 +98,19 @@ bool AttackManager::troopIsReady(Entity& myEntity, vector<vector<char>>& gameMap
     }
 
     return troopSize >= 5;
+}
+
+optional<Vec2Int> AttackManager::needDefense() {
+    for (auto& enemy : others) {
+        for (auto& myBase : myBases) {
+            auto res = getDistance(enemy, myBase, entityProperties);
+            if (res.first < DEFENSE_THRESHOLD) {
+                return enemy.position;
+            }
+        }
+    }
+
+    return {};
 }
 
 void AttackManager::goToResources(Entity& myEntity, vector<vector<char>>& gameMap,
@@ -117,5 +151,3 @@ void AttackManager::goToResources(Entity& myEntity, vector<vector<char>>& gameMa
         }
     }
 }
-
-

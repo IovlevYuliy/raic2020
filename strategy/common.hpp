@@ -17,6 +17,7 @@ const float MAX_BUILDERS_PERCENTAGE = 0.4;
 const int MAX_RANGED_BASE = 3;
 const int MAX_BUILDERS = 30;
 const int BUILDER_DELAY_TICKS = 10;
+const int DEFENSE_THRESHOLD = 20;
 
 const int dx[4] = {0, 0, 1, -1};
 const int dy[4] = {1, -1, 0, 0};

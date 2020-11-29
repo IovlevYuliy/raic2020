@@ -27,7 +27,7 @@ void MyStrategy::parsePlayerView(const PlayerView& playerView) {
     buildingManager->entityProperties = entityProperties;
     attackManager->entityProperties = entityProperties;
     unitManager->entityProperties = entityProperties;
-    attackManager->getAims(enemyEntities);
+    attackManager->getAims(enemyEntities, myEntities);
     restoreGameMap(playerView);
 
     calcPopulationStats();
@@ -59,7 +59,7 @@ void MyStrategy::restoreGameMap(const PlayerView& playerView) {
 }
 
 Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debugInterface) {
-    const clock_t total_begin_time = clock();
+    // const clock_t total_begin_time = clock();
 
     parsePlayerView(playerView);
 
@@ -84,7 +84,7 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
 
     buildingManager->repairBuildings(myEntities, actions);
 
-    cerr << "Total elapsed time " << float(clock() - total_begin_time) / CLOCKS_PER_SEC << endl;
+    // cerr << "Total elapsed time " << float(clock() - total_begin_time) / CLOCKS_PER_SEC << endl;
     return Action(actions);
 }
 

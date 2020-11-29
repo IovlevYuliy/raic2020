@@ -10,6 +10,7 @@ public:
     vector<Entity> turrets;
     vector<Entity> bases;
     vector<Entity> others;
+    vector<Entity> myBases;
 
     AttackManager();
 
@@ -18,8 +19,9 @@ public:
     void goToResources(Entity& myEntity, vector<vector<char>>& gameMap,
         unordered_map<int, EntityAction>& actions);
 
+    optional<Vec2Int> needDefense();
     bool troopIsReady(Entity& myEntity, vector<vector<char>>& gameMap);
-    void getAims(vector<Entity>& enemyEntities);
+    void getAims(vector<Entity>& enemyEntities, vector<Entity>& myEntities);
 };
 
 #endif
