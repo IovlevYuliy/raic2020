@@ -26,6 +26,7 @@ void MyStrategy::parsePlayerView(const PlayerView& playerView) {
     entityProperties = playerView.entityProperties;
     buildingManager->entityProperties = entityProperties;
     attackManager->entityProperties = entityProperties;
+    unitManager->entityProperties = entityProperties;
     attackManager->getAims(enemyEntities);
     restoreGameMap(playerView);
 
@@ -63,8 +64,8 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
     parsePlayerView(playerView);
 
     unordered_map<int, EntityAction> actions;
-    unitManager->createUnits(myEntities, actions, EntityType::BUILDER_UNIT);
-    unitManager->createUnits(myEntities, actions, EntityType::RANGED_UNIT);
+    unitManager->createUnits(myEntities, gameMap, actions, EntityType::BUILDER_UNIT);
+    unitManager->createUnits(myEntities, gameMap, actions, EntityType::RANGED_UNIT);
 
     for (auto& entry : myEntities) {
         if (isUnit(entry)) {

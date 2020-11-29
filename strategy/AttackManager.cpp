@@ -28,6 +28,9 @@ void AttackManager::goToAttack(Entity& myEntity, vector<vector<char>>& gameMap,
         goToResources(myEntity, gameMap, actions);
         return;
     }
+    if (!troopIsReady(myEntity, gameMap)) {
+        return;
+    }
 
     uint mapSize = (uint)gameMap.size();
 
@@ -54,6 +57,26 @@ void AttackManager::goToAttack(Entity& myEntity, vector<vector<char>>& gameMap,
             MoveAction(Vec2Int(mapSize - 1, mapSize - 1), true, false)
         );
     }
+}
+
+bool AttackManager::troopIsReady(Entity& myEntity, vector<vector<char>>& gameMap) {
+    Vec2Int pos(myEntity.position.x, myEntity.position.y - 1);
+    uint mapSize = (uint)gameMap.size();
+    if (isOutOfMap(pos, mapSize) ||
+            gameMap[myEntity.position.x][myEntity.position.y - 1] != EntityType::RANGED_BASE) {
+        return true;
+    }
+
+    uint baseSize = entityProperties[EntityType::RANGED_BASE].size;
+    pos.y = myEntity.position.y;
+    uint troopSize = 0;
+    for(uint i = myEntity.position.x - baseSize; i < myEntity.position.x + baseSize; ++i) {
+        pos.x = i;
+        if (!isOutOfMap(pos, mapSize) && gameMap[pos.x][pos.y] == EntityType::RANGED_UNIT)
+            troopSize++;
+    }
+
+    return troopSize >= 5;
 }
 
 void AttackManager::goToResources(Entity& myEntity, vector<vector<char>>& gameMap,

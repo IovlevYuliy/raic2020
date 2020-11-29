@@ -17,6 +17,8 @@ public:
         unordered_map<int, EntityAction>& actions);
     void goToResources(Entity& myEntity, vector<vector<char>>& gameMap,
         unordered_map<int, EntityAction>& actions);
+
+    bool troopIsReady(Entity& myEntity, vector<vector<char>>& gameMap);
     void getAims(vector<Entity>& enemyEntities);
 };
 
