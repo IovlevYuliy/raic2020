@@ -7,12 +7,17 @@
 #include <unordered_set>
 #include <functional>
 #include <queue>
+#include <ctime>
 
 #include "model/Model.hpp"
 
 using namespace std;
 
 const float MAX_BUILDERS_PERCENTAGE = 0.4;
+const int MAX_RANGED_BASE = 3;
+const int MAX_BUILDERS = 30;
+const int BUILDER_DELAY_TICKS = 10;
+
 const int dx[4] = {0, 0, 1, -1};
 const int dy[4] = {1, -1, 0, 0};
 
@@ -24,6 +29,14 @@ inline bool isBase(EntityType type) {
     return type == EntityType::BUILDER_BASE ||
         type == EntityType::MELEE_BASE ||
         type == EntityType::RANGED_BASE;
+}
+
+inline bool isBuilding(EntityType type) {
+    return type == EntityType::BUILDER_BASE ||
+        type == EntityType::MELEE_BASE ||
+        type == EntityType::RANGED_BASE ||
+        type == EntityType::HOUSE ||
+        type == EntityType::TURRET;
 }
 
 inline bool isRepairingBuilding(const Entity& entry) {

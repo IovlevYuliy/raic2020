@@ -10,10 +10,10 @@ public:
 
     BuildingManager();
 
-    void createBuilding(vector<Entity>& myEntities, vector<vector<char>>& gameMap,
+    optional<int> createBuilding(vector<Entity>& myEntities, vector<vector<char>>& gameMap,
         unordered_map<int, EntityAction>& actions, EntityType unitType);
 
-    void repairBuildings(vector<Entity>& myEntities,
+    vector<int> repairBuildings(vector<Entity>& myEntities,
         unordered_map<int, EntityAction>& actions);
 
     bool isForbidden(Vec2Int& pos, vector<vector<char>>& gameMap);

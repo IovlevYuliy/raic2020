@@ -8,18 +8,27 @@ class UnitManager {
 public:
     uint totalPopulation;
     uint usedPopulation;
+    uint curBuilderCount;
 
     UnitManager();
 
-    void setPopulation(uint total, uint used) {
+    void setPopulation(uint total, uint used, uint builderCount) {
         totalPopulation = total;
         usedPopulation = used;
+        curBuilderCount = builderCount;
     }
 
-    void createUnit(vector<Entity>& myEntities, unordered_map<int, EntityAction>& actions, EntityType unitType);
+    void createUnits(vector<Entity>& myEntities,
+        unordered_map<int, EntityAction>& actions,
+        EntityType unitType,
+        bool force = false);
 
-    void createBuilder(vector<Entity>& myEntities, unordered_map<int, EntityAction>& actions);
-    void createRanger(vector<Entity>& myEntities, unordered_map<int, EntityAction>& actions);
+    void createBuilder(Entity& builderBaser,
+        unordered_map<int, EntityAction>& actions,
+        bool force = false);
+
+    void createRanger(Entity& rangerBase,
+        unordered_map<int, EntityAction>& actions);
 };
 
 #endif

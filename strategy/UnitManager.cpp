@@ -2,35 +2,28 @@
 
 UnitManager::UnitManager() {}
 
-void UnitManager::createUnit(vector<Entity>& myEntities,
-        unordered_map<int, EntityAction>& actions, EntityType unitType) {
-    switch (unitType) {
-    case EntityType::BUILDER_UNIT:
-        createBuilder(myEntities, actions);
-        break;
-    case EntityType::RANGED_UNIT:
-        createRanger(myEntities, actions);
-        break;
-    default:
-        break;
+void UnitManager::createUnits(vector<Entity>& myEntities,
+        unordered_map<int, EntityAction>& actions, EntityType unitType, bool force) {
+    for (auto& entry : myEntities) {
+        if (entry.entityType == EntityType::BUILDER_BASE && unitType == EntityType::BUILDER_UNIT) {
+            createBuilder(entry, actions, force);
+        }
+
+        if (entry.entityType == EntityType::RANGED_BASE && unitType == EntityType::RANGED_UNIT) {
+            createRanger(entry, actions);
+        }
     }
 }
 
-void UnitManager::createBuilder(vector<Entity>& myEntities, unordered_map<int, EntityAction>& actions) {
-    uint curBuilderCount = 0;
-    for (auto& entry : myEntities) {
-        curBuilderCount += isBuilder(entry);
-    }
-
-    Entity& builderBase = *find_if(myEntities.begin(), myEntities.end(), [](const Entity& entry) {
-        return entry.entityType == EntityType::BUILDER_BASE;
-    });
-
-    if (curBuilderCount >= totalPopulation * MAX_BUILDERS_PERCENTAGE) {
+void UnitManager::createBuilder(Entity& builderBase,
+        unordered_map<int, EntityAction>& actions, bool force) {
+    if ((!force && curBuilderCount > 10 && curBuilderCount >= totalPopulation * MAX_BUILDERS_PERCENTAGE) ||
+            curBuilderCount >= MAX_BUILDERS) {
         actions[builderBase.id] = EntityAction();
         return;
     }
 
+    curBuilderCount++;
     actions[builderBase.id] = EntityAction(
         {}, // move
         BuildAction(
@@ -40,12 +33,7 @@ void UnitManager::createBuilder(vector<Entity>& myEntities, unordered_map<int, E
     );
 }
 
-void UnitManager::createRanger(vector<Entity>& myEntities,
-        unordered_map<int, EntityAction>& actions) {
-    Entity& rangerBase = *find_if(myEntities.begin(), myEntities.end(), [](const Entity& entry) {
-        return entry.entityType == EntityType::RANGED_BASE;
-    });
-
+void UnitManager::createRanger(Entity& rangerBase, unordered_map<int, EntityAction>& actions) {
     actions[rangerBase.id] = EntityAction(
         {}, // move
         BuildAction(

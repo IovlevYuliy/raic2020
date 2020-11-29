@@ -1,7 +1,7 @@
 {
-  "view_speed_modifier": 0.8886657714843751,
+  "view_speed_modifier": 2.0,
   "volume": 0.5,
   "renderer": {
-    "mode": "Space"
+    "mode": "Schematic"
   }
 }

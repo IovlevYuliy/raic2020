@@ -4,28 +4,46 @@
 MyStrategy::MyStrategy() {
     unitManager = shared_ptr<UnitManager>(new UnitManager());
     buildingManager = shared_ptr<BuildingManager>(new BuildingManager());
+    attackManager = shared_ptr<AttackManager>(new AttackManager());
 }
 
 void MyStrategy::calcPopulationStats() {
     totalPopulation = 0;
     usedPopulation = 0;
+    curBuilderCount = 0;
+    rangedBaseCount = 0;
+
     for (auto& entry : myEntities) {
         totalPopulation += entityProperties[entry.entityType].populationProvide;
         usedPopulation += entityProperties[entry.entityType].populationUse;
+        curBuilderCount += isBuilder(entry);
+        rangedBaseCount += (entry.entityType == EntityType::RANGED_BASE);
     }
 }
 
 void MyStrategy::parsePlayerView(const PlayerView& playerView) {
-    myEntities = getMyEntities(playerView);
+    getSplittedEntities(playerView);
     entityProperties = playerView.entityProperties;
     buildingManager->entityProperties = entityProperties;
+    attackManager->entityProperties = entityProperties;
+    attackManager->getAims(enemyEntities);
+    restoreGameMap(playerView);
 
     calcPopulationStats();
-    unitManager->setPopulation(totalPopulation, usedPopulation);
-    cerr << "population " << totalPopulation << ' ' << usedPopulation << endl;
+    unitManager->setPopulation(totalPopulation, usedPopulation, curBuilderCount);
+
+    for (auto& pl : playerView.players) {
+        if (pl.id == playerView.myId) {
+            resources = pl.resource;
+        }
+    }
 }
 
 void MyStrategy::restoreGameMap(const PlayerView& playerView) {
+    // if (playerView.currentTick & 1) {
+    //     return;
+    // }
+
     gameMap.resize(playerView.mapSize);
     gameMap.assign(playerView.mapSize, vector<char>(playerView.mapSize, -1));
 
@@ -40,57 +58,47 @@ void MyStrategy::restoreGameMap(const PlayerView& playerView) {
 }
 
 Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debugInterface) {
+    const clock_t total_begin_time = clock();
+
     parsePlayerView(playerView);
 
     unordered_map<int, EntityAction> actions;
-    unitManager->createUnit(myEntities, actions, EntityType::BUILDER_UNIT);
-    unitManager->createUnit(myEntities, actions, EntityType::RANGED_UNIT);
+    unitManager->createUnits(myEntities, actions, EntityType::BUILDER_UNIT);
+    unitManager->createUnits(myEntities, actions, EntityType::RANGED_UNIT);
 
     for (auto& entry : myEntities) {
-        optional<MoveAction> mvAction;
-        optional<AttackAction> attackAction;
-
-        auto properties = &playerView.entityProperties.find(entry.entityType)->second;
         if (isUnit(entry)) {
-            mvAction = MoveAction(
-                Vec2Int(playerView.mapSize - 1, playerView.mapSize - 1),
-                true,
-                true
-            );
-
-            attackAction = AttackAction(
-                NULL,
-                shared_ptr<AutoAttack>(new AutoAttack(
-                    properties->sightRange,
-                    isBuilder(entry) ? vector<EntityType>{ EntityType::RESOURCE }: vector<EntityType>()
-                ))
-            );
-
-
-            actions[entry.id] = EntityAction(mvAction, attackAction);
+            attackManager->goToAttack(entry, gameMap, actions);
         }
-
     }
 
     if (totalPopulation - usedPopulation == 0) {
-        restoreGameMap(playerView);
         buildingManager->createBuilding(myEntities, gameMap, actions, EntityType::HOUSE);
+    }
+
+    if (resources > entityProperties[EntityType::RANGED_BASE].cost &&
+            rangedBaseCount < MAX_RANGED_BASE) {
+        buildingManager->createBuilding(myEntities, gameMap, actions, EntityType::RANGED_BASE);
     }
 
     buildingManager->repairBuildings(myEntities, actions);
 
+    cerr << "Total elapsed time " << float(clock() - total_begin_time) / CLOCKS_PER_SEC << endl;
     return Action(actions);
 }
 
-vector<Entity> MyStrategy::getMyEntities(const PlayerView& playerView, EntityType type) {
-    vector<Entity> myEntities;
+void MyStrategy::getSplittedEntities(const PlayerView& playerView, EntityType type) {
+    myEntities.clear();
+    enemyEntities.clear();
     for (auto& entry : playerView.entities) {
         if (entry.playerId && *entry.playerId == playerView.myId) {
             myEntities.push_back(entry);
+            myEntities.back().busy = false;
+        }
+        if (entry.playerId && *entry.playerId != playerView.myId) {
+            enemyEntities.push_back(entry);
         }
     }
-
-    return myEntities;
 }
 
 void MyStrategy::debugUpdate(const PlayerView& playerView, DebugInterface& debugInterface) {
