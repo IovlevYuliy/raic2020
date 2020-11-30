@@ -16,6 +16,7 @@ public:
 
     vector<Entity>myEntities;
     vector<Entity>enemyEntities;
+    float totalGameTime = 0;
 
     unordered_map<int, int> busyBuilders;
     unordered_map<EntityType, EntityProperties> entityProperties;
@@ -24,6 +25,7 @@ public:
     uint curBuilderCount;
     uint rangedBaseCount;
     uint builderBaseCount;
+    uint currentTick;
     uint resources;
     vector<vector<char> >gameMap;
 

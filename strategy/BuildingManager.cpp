@@ -11,7 +11,6 @@ optional<int> BuildingManager::createBuilding(vector<Entity>& myEntities, vector
     });
     auto builder = getNearestBuilder(myEntities, builderBase).second;
 
-
     if (!builder.playerId) {
         return {};
     }
@@ -99,7 +98,6 @@ optional<Vec2Int> BuildingManager::findPlace(vector<vector<char> >& gameMap, Vec
     while (!q.empty()) {
         Vec2Int v = q.front();
         q.pop();
-        visited.insert(v);
 
         bool ok = checkPlace(v) && checkNeighbors(v, size, gameMap);
         if (ok) {
@@ -112,6 +110,7 @@ optional<Vec2Int> BuildingManager::findPlace(vector<vector<char> >& gameMap, Vec
                 continue;
             }
             q.push(to);
+            visited.insert(to);
         }
     }
 

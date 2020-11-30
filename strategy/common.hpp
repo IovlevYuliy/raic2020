@@ -14,7 +14,7 @@
 using namespace std;
 
 const float MAX_BUILDERS_PERCENTAGE = 0.4;
-const int MAX_RANGED_BASE = 3;
+const int MAX_RANGED_BASE = 4;
 const int MAX_BUILDER_BASE = 1;
 const int MAX_BUILDERS = 30;
 const int BUILDER_DELAY_TICKS = 10;
@@ -97,6 +97,22 @@ inline pair<uint, Vec2Int> getDistance(Entity& e1, Entity& e2, unordered_map<Ent
     }
 
     return make_pair(minDist, destVec);
+}
+
+inline pair<uint, pair<Vec2Int, Entity*>> getNearestTarget(Entity& myEntiry, vector<Entity>& enemies, unordered_map<EntityType, EntityProperties>& entityProperties) {
+    uint minDist = 1e9;
+    Vec2Int destVec;
+    Entity* target;
+    for (auto& enemy : enemies) {
+        auto res = getDistance(myEntiry, enemy, entityProperties);
+        if (res.first < minDist) {
+            minDist = res.first;
+            destVec = res.second;
+            target = &enemy;
+        }
+    }
+
+    return make_pair(minDist, make_pair(destVec, target));
 }
 
 #endif

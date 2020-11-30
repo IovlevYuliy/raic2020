@@ -25,15 +25,20 @@ void MyStrategy::calcPopulationStats() {
 
 void MyStrategy::parsePlayerView(const PlayerView& playerView) {
     getSplittedEntities(playerView);
+
     entityProperties = playerView.entityProperties;
     buildingManager->entityProperties = entityProperties;
     attackManager->entityProperties = entityProperties;
     unitManager->entityProperties = entityProperties;
+
     attackManager->getAims(enemyEntities, myEntities);
+
+    currentTick = playerView.currentTick;
     restoreGameMap(playerView);
 
     calcPopulationStats();
     unitManager->setPopulation(totalPopulation, usedPopulation, curBuilderCount);
+    unitManager->currentTick = currentTick;
 
     for (auto& pl : playerView.players) {
         if (pl.id == playerView.myId) {
@@ -75,7 +80,7 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         }
     }
 
-    if (totalPopulation - usedPopulation == 0) {
+    if (totalPopulation - usedPopulation < 2) {
         buildingManager->createBuilding(myEntities, gameMap, actions, EntityType::HOUSE);
     }
 
@@ -91,7 +96,9 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
 
     buildingManager->repairBuildings(myEntities, actions);
 
-    // cerr << "Total elapsed time " << float(clock() - total_begin_time) / CLOCKS_PER_SEC << endl;
+    // totalGameTime += float(clock() - total_begin_time) / CLOCKS_PER_SEC;
+    // cerr << "Total game time " << totalGameTime << endl;
+
     return Action(actions);
 }
 

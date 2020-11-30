@@ -17,7 +17,7 @@ void UnitManager::createUnits(vector<Entity>& myEntities, vector<vector<char>>& 
 
 void UnitManager::createBuilder(Entity& builderBase,
         unordered_map<int, EntityAction>& actions, bool force) {
-    if ((!force && curBuilderCount > 10 && curBuilderCount >= totalPopulation * MAX_BUILDERS_PERCENTAGE) ||
+    if ((currentTick > 400 && curBuilderCount >= totalPopulation * MAX_BUILDERS_PERCENTAGE) ||
             curBuilderCount >= MAX_BUILDERS) {
         actions[builderBase.id] = EntityAction();
         return;

@@ -3,19 +3,13 @@
 AttackManager::AttackManager() {}
 
 void AttackManager::getAims(vector<Entity>& enemyEntities, vector<Entity>& myEntities) {
-    turrets.clear();
-    bases.clear();
     others.clear();
     myBases.clear();
+    enemyBuildings.clear();
 
     for (auto& entry : enemyEntities) {
-        if (entry.entityType == EntityType::TURRET) {
-            turrets.push_back(entry);
-            continue;
-        }
-
-        if (isBase(entry.entityType)) {
-            bases.push_back(entry);
+        if (isBuilding(entry.entityType)) {
+            enemyBuildings.push_back(entry);
             continue;
         }
 
@@ -39,6 +33,7 @@ void AttackManager::goToAttack(Entity& myEntity, vector<vector<char>>& gameMap,
         return;
     }
 
+    uint attackRange = entityProperties[myEntity.entityType].attack->attackRange;
     auto defPosition = needDefense();
     if (defPosition) {
         if (defPosition.value().dist(myEntity.position) < 2 * DEFENSE_THRESHOLD) {
@@ -53,26 +48,32 @@ void AttackManager::goToAttack(Entity& myEntity, vector<vector<char>>& gameMap,
         return;
     }
 
-    uint mapSize = (uint)gameMap.size();
+    auto target = getNearestTarget(myEntity, enemyBuildings, entityProperties);
+    if (target.first <= attackRange && target.second.second->health > 0) {
+        uint damage = entityProperties[myEntity.entityType].attack->damage;
+        actions[myEntity.id] = EntityAction(
+            {},
+            AttackAction(target.second.second->id, {})
+        );
 
-    Entity* aim = NULL;
-    if (!turrets.empty()) {
-        aim = &turrets[0];
-    } else if (!bases.empty()){
-        aim = &bases[0];
-    } else if (!others.empty()) {
-        aim = &others[0];
+        target.second.second->health -= damage;
+        return;
     }
 
-    if (aim) {
-        auto mvAction = MoveAction(aim->position, true, false);
+    if (target.first == 1e9 || target.second.second->health <= 0) {
+        target = getNearestTarget(myEntity, others, entityProperties);
+    }
+
+    if (target.first != 1e9) {
+        auto mvAction = MoveAction(target.second.first, true, false);
         auto attackAction = AttackAction(
             {},
-            AutoAttack(entityProperties[myEntity.entityType].sightRange, vector<EntityType>())
+            AutoAttack(attackRange, vector<EntityType>{EntityType::RANGED_UNIT, EntityType::MELEE_UNIT, EntityType::BUILDER_UNIT})
         );
 
         actions[myEntity.id] = EntityAction(mvAction, attackAction);
     } else {
+        uint mapSize = (uint)gameMap.size();
         Vec2Int corner(mapSize - 1, mapSize - 1);
         actions[myEntity.id] = EntityAction(
             MoveAction(Vec2Int(mapSize - 1, mapSize - 1), true, false)
@@ -93,8 +94,9 @@ bool AttackManager::troopIsReady(Entity& myEntity, vector<vector<char>>& gameMap
     uint troopSize = 0;
     for(uint i = myEntity.position.x - baseSize; i < myEntity.position.x + baseSize; ++i) {
         pos.x = i;
-        if (!isOutOfMap(pos, mapSize) && gameMap[pos.x][pos.y] == EntityType::RANGED_UNIT)
+        if (!isOutOfMap(pos, mapSize) && gameMap[pos.x][pos.y] == EntityType::RANGED_UNIT) {
             troopSize++;
+        }
     }
 
     return troopSize >= 5;
@@ -121,6 +123,7 @@ void AttackManager::goToResources(Entity& myEntity, vector<vector<char>>& gameMa
     q.push(myEntity.position);
     visited.insert(myEntity.position);
 
+    uint attackRange = entityProperties[myEntity.entityType].attack->attackRange;
     uint it = 0;
     while (!q.empty()) {
         Vec2Int v = q.front();
@@ -138,10 +141,7 @@ void AttackManager::goToResources(Entity& myEntity, vector<vector<char>>& gameMa
                     MoveAction(to, true, false),
                     AttackAction(
                         {},
-                        AutoAttack(entityProperties[myEntity.entityType].sightRange,
-                            vector<EntityType>{ EntityType::RESOURCE })
-                    )
-                );
+                        AutoAttack(attackRange, vector<EntityType>{})));
 
                 return;
             } else if(gameMap[to.x][to.y] == -1) {

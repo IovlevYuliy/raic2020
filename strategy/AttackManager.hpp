@@ -7,8 +7,7 @@
 class AttackManager {
 public:
     unordered_map<EntityType, EntityProperties> entityProperties;
-    vector<Entity> turrets;
-    vector<Entity> bases;
+    vector<Entity> enemyBuildings;
     vector<Entity> others;
     vector<Entity> myBases;
 

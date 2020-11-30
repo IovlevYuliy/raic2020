@@ -11,6 +11,7 @@ public:
     uint totalPopulation;
     uint usedPopulation;
     uint curBuilderCount;
+    uint currentTick;
 
     UnitManager();
 
