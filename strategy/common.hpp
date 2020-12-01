@@ -5,8 +5,11 @@
 #include <iostream>
 #include <algorithm>
 #include <unordered_set>
+#include <unordered_map>
 #include <functional>
 #include <queue>
+#include <vector>
+#include <string>
 #include <ctime>
 
 #include "model/Model.hpp"

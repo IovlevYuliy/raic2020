@@ -1,26 +1,21 @@
 #ifndef _ATTACK_MANAGER_HPP_
 #define _ATTACK_MANAGER_HPP_
 
-#include "model/Model.hpp"
 #include "common.hpp"
+#include "GameState.hpp"
 
 class AttackManager {
 public:
-    unordered_map<EntityType, EntityProperties> entityProperties;
-    vector<Entity> enemyBuildings;
-    vector<Entity> others;
-    vector<Entity> myBases;
+    GameState* state;
 
     AttackManager();
+    AttackManager(GameState& state_);
 
-    void goToAttack(Entity& myEntity, vector<vector<char>>& gameMap,
-        unordered_map<int, EntityAction>& actions);
-    void goToResources(Entity& myEntity, vector<vector<char>>& gameMap,
-        unordered_map<int, EntityAction>& actions);
+    void goToAttack(Entity& myEntity, unordered_map<int, EntityAction>& actions);
+    void goToResources(Entity& myEntity, unordered_map<int, EntityAction>& actions);
 
     optional<Vec2Int> needDefense();
-    bool troopIsReady(Entity& myEntity, vector<vector<char>>& gameMap);
-    void getAims(vector<Entity>& enemyEntities, vector<Entity>& myEntities);
+    bool troopIsReady(Entity& myEntity);
 };
 
 #endif

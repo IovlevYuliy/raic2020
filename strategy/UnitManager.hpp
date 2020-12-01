@@ -1,37 +1,23 @@
 #ifndef _UNIT_BUILDER_MANAGER_HPP_
 #define _UNIT_BUILDER_MANAGER_HPP_
 
-#include "model/Model.hpp"
 #include "common.hpp"
+#include "GameState.hpp"
 
 class UnitManager {
 public:
-    unordered_map<EntityType, EntityProperties> entityProperties;
-
-    uint totalPopulation;
-    uint usedPopulation;
-    uint curBuilderCount;
-    uint currentTick;
+    GameState* state;
 
     UnitManager();
+    UnitManager(GameState& state_);
 
-    void setPopulation(uint total, uint used, uint builderCount) {
-        totalPopulation = total;
-        usedPopulation = used;
-        curBuilderCount = builderCount;
-    }
-
-    void createUnits(vector<Entity>& myEntities, vector<vector<char>>& gameMap,
-        unordered_map<int, EntityAction>& actions,
-        EntityType unitType,
+    void createUnits(unordered_map<int, EntityAction>& actions, EntityType unitType,
         bool force = false);
 
-    void createBuilder(Entity& builderBaser,
-        unordered_map<int, EntityAction>& actions,
+    void createBuilder(Entity& builderBase, unordered_map<int, EntityAction>& actions,
         bool force = false);
 
-    void createRanger(Entity& rangerBase, vector<vector<char>>& gameMap,
-        unordered_map<int, EntityAction>& actions);
+    void createRanger(Entity& rangerBase, unordered_map<int, EntityAction>& actions);
 };
 
 #endif
