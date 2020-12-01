@@ -45,6 +45,7 @@ void GameState::splitEntities(const PlayerView& playerView) {
     enemyBuildings.clear();
     others.clear();
 
+    resourcesExist = false;
     for (auto& entry : playerView.entities) {
         if (entry.playerId && *entry.playerId == playerView.myId) {
             myEntities.push_back(entry);
@@ -60,6 +61,7 @@ void GameState::splitEntities(const PlayerView& playerView) {
                 others.push_back(entry);
             }
         }
+        resourcesExist = resourcesExist || (entry.entityType == EntityType::RESOURCE);
     }
 }
 

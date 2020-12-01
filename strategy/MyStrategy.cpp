@@ -16,17 +16,18 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
     unitManager->createUnits(actions, EntityType::RANGED_UNIT);
 
     for (auto& entry : state.myEntities) {
-        if (isUnit(entry)) {
+        if (isUnit(entry) || isTurret(entry)) {
             attackManager->goToAttack(entry, actions);
+            continue;
         }
     }
 
-    if (state.totalPopulation - state.usedPopulation < 2) {
+    if (state.totalPopulation - state.usedPopulation < 6) {
         buildingManager->createBuilding(actions, EntityType::HOUSE);
     }
 
     if (state.resources > state.entityProperties[EntityType::RANGED_BASE].cost &&
-            state.rangedBaseCount < MAX_RANGED_BASE) {
+            state.rangedBaseCount < MAX_RANGED_BASE && state.totalPopulation > 50 * state.rangedBaseCount) {
         buildingManager->createBuilding(actions, EntityType::RANGED_BASE);
     }
 
@@ -37,8 +38,8 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
 
     buildingManager->repairBuildings(actions);
 
-    totalGameTime += float(clock() - total_begin_time) / CLOCKS_PER_SEC;
-    cerr << "Total game time " << totalGameTime << endl;
+    // totalGameTime += float(clock() - total_begin_time) / CLOCKS_PER_SEC;
+    // cerr << "Total game time " << totalGameTime << endl;
 
     return Action(actions);
 }

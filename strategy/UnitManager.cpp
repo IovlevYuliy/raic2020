@@ -21,32 +21,28 @@ void UnitManager::createUnits(unordered_map<int, EntityAction>& actions, EntityT
 void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAction>& actions, bool force) {
     if ((state->currentTick > 400 &&
             state->curBuilderCount >= state->totalPopulation * MAX_BUILDERS_PERCENTAGE) ||
-            state->curBuilderCount >= MAX_BUILDERS) {
+            state->curBuilderCount >= MAX_BUILDERS || !state->resourcesExist) {
         actions[builderBase.id] = EntityAction();
         return;
     }
 
+    uint baseSize = state->entityProperties[EntityType::BUILDER_BASE].size;
+
     actions[builderBase.id] = EntityAction(
-        {}, // move
+        {},  // move
         BuildAction(
             EntityType::BUILDER_UNIT,
-            Vec2Int(builderBase.position.x - 1, builderBase.position.y)
-        )
-    );
+            Vec2Int(builderBase.position.x + baseSize, builderBase.position.y)));
 }
 
 void UnitManager::createRanger(Entity& rangerBase, unordered_map<int, EntityAction>& actions) {
     uint baseSize = state->entityProperties[EntityType::RANGED_BASE].size;
-    for (uint i = 0; i < baseSize; ++i) {
-        auto target = Vec2Int(rangerBase.position.x + i, rangerBase.position.y + baseSize);
-        if (isOutOfMap(target, state->mapSize)) {
-            continue;
-        }
-        if (state->gameMap[target.x][target.y] == -1) {
-            actions[rangerBase.id] = EntityAction(
-                {},  // move
-                BuildAction(EntityType::RANGED_UNIT, target));
-            return;
-        }
-    }
+
+    actions[rangerBase.id] = EntityAction(
+        {},  // move
+        BuildAction(
+            EntityType::RANGED_UNIT,
+            Vec2Int(rangerBase.position.x + baseSize, rangerBase.position.y)
+        )
+    );
 }

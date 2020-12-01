@@ -6,26 +6,23 @@ BuildingManager::BuildingManager(GameState& state_) {
 }
 
 optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& actions, EntityType buildingType) {
-    uint size = state->entityProperties[buildingType].size;
-
-    auto& builderBase = *find_if(state->myBases.begin(), state->myBases.end(), [](const Entity& entry){
-        return entry.entityType == EntityType::BUILDER_BASE;
-    });
-
-    auto builder = getNearestBuilder(builderBase).second;
-
-    if (!builder.playerId) {
+    if(state->curBuilderCount < 1) {
         return {};
     }
 
-    auto foundPlace = findPlace(builder.position, size);
-    if (foundPlace.has_value()) {
-        actions[builder.id] = EntityAction(
-            MoveAction(Vec2Int(foundPlace.value().x, foundPlace.value().y), true,false),
-            BuildAction(buildingType, foundPlace.value())
-        );
+    uint size = state->entityProperties[buildingType].size;
 
-        return builder.id;
+    optional<Vec2Int> foundPlace = findPlace(Vec2Int(0, 0), size);
+
+    if (foundPlace) {
+        auto builders = getNearestBuilders(foundPlace.value(), 1);
+
+        for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
+            actions[builders[i]->id] = EntityAction(
+                MoveAction(Vec2Int(foundPlace.value().x, foundPlace.value().y), true,false),
+                BuildAction(buildingType, foundPlace.value())
+            );
+        }
     }
 
     return {};
@@ -41,16 +38,35 @@ void BuildingManager::repairBuildings(unordered_map<int, EntityAction>& actions)
     }
 
     for (auto& entry : buildingsForRepair) {
-        auto res = getNearestBuilder(entry);
-        if (res.first.x != -1) {
-            actions[res.second.id] = EntityAction(
-                MoveAction(Vec2Int(res.first.x, res.first.y), true, false),
-                {}, // build
-                {}, // attack
-                RepairAction(entry.id)
-            );
+        auto builders = getNearestBuilders(entry.position, repairBuilderCount[entry.entityType]);
+        for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
+            actions[builders[i]->id] = EntityAction(
+                MoveAction(entry.position, true, false),
+                {},  // build
+                {},  // attack
+                RepairAction(entry.id));
         }
     }
+}
+
+vector<Entity*> BuildingManager::getNearestBuilders(Vec2Int pos, uint count) {
+    vector<pair<int, int>> q;
+    for (uint i = 0; i < static_cast<uint>(state->myEntities.size()); ++i) {
+        if (!isBuilder(state->myEntities[i])) {
+            continue;
+        }
+        uint sqrDist = pos.sqrDist(state->myEntities[i].position);
+        q.push_back(make_pair(sqrDist, i));
+    }
+    sort(q.begin(), q.end());
+
+    count = min(count, static_cast<uint>(q.size()));
+    vector<Entity*> builders;
+    for (uint i = 0; i < count; ++i) {
+        builders.push_back(&state->myEntities[q[i].second]);
+    }
+
+    return builders;
 }
 
 pair<Vec2Int, Entity> BuildingManager::getNearestBuilder(Entity& destEntity) {
@@ -79,16 +95,7 @@ pair<Vec2Int, Entity> BuildingManager::getNearestBuilder(Entity& destEntity) {
 }
 
 optional<Vec2Int> BuildingManager::findPlace(Vec2Int start, uint size) {
-    uint& mapSize = state->mapSize;
-    auto checkPlace = [&size, &st = state, &mapSize](Vec2Int& s) {
-        for (uint i = s.x; i < s.x + size; ++i) {
-            for (uint j = s.y; j < s.y + size; ++j) {
-                if (i >= mapSize || j >= mapSize || st->gameMap[i][j] != -1)
-                    return false;
-            }
-        }
-        return true;
-    };
+    uint mapSize = state->mapSize;
 
     queue<Vec2Int> q;
     unordered_set<Vec2Int> visited;
@@ -97,14 +104,14 @@ optional<Vec2Int> BuildingManager::findPlace(Vec2Int start, uint size) {
         Vec2Int v = q.front();
         q.pop();
 
-        bool ok = checkPlace(v) && checkNeighbors(v, size);
-        if (ok) {
+        bool ok = isFree(v, size) && checkNeighbors(v, size);
+        if (ok && v.x % 4 == 0 && v.y % 4 == 0) {
             return v;
         }
 
         for (uint i = 0; i < 4; ++i) {
             Vec2Int to(v.x + dx[i], v.y + dy[i]);
-            if (isOutOfMap(to, mapSize) || state->gameMap[to.x][to.y] != -1 || visited.count(to)) {
+            if (isOutOfMap(to, mapSize) || visited.count(to)) {
                 continue;
             }
             q.push(to);
@@ -113,6 +120,19 @@ optional<Vec2Int> BuildingManager::findPlace(Vec2Int start, uint size) {
     }
 
     return {};
+}
+
+bool BuildingManager::isFree(Vec2Int& pos, uint size) {
+    uint mapSize = state->mapSize;
+
+    for (uint i = pos.x; i < pos.x + size; ++i) {
+        for (uint j = pos.y; j < pos.y + size; ++j) {
+            if (i >= mapSize || j >= mapSize || state->gameMap[i][j] != -1)
+                return false;
+        }
+    }
+
+    return true;
 }
 
 bool BuildingManager::isForbidden(Vec2Int& pos) {

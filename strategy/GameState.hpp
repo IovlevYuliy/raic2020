@@ -24,6 +24,7 @@ public:
     uint builderBaseCount;
     uint meleeBaseCount;
 
+    bool resourcesExist;
     uint resources;
     uint currentTick;
 

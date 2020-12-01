@@ -14,6 +14,8 @@ public:
     void goToAttack(Entity& myEntity, unordered_map<int, EntityAction>& actions);
     void goToResources(Entity& myEntity, unordered_map<int, EntityAction>& actions);
 
+    pair<Entity*,Entity*> getTarget(Entity& myEntity);
+
     optional<Vec2Int> needDefense();
     bool troopIsReady(Entity& myEntity);
 };

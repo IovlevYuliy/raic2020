@@ -44,6 +44,10 @@ inline bool isBuilding(EntityType type) {
         type == EntityType::TURRET;
 }
 
+inline bool isTurret(const Entity& entry) {
+    return entry.entityType == EntityType::TURRET;
+}
+
 inline bool isRepairingBuilding(const Entity& entry) {
     return entry.entityType == EntityType::BUILDER_BASE ||
         entry.entityType == EntityType::HOUSE ||
@@ -70,14 +74,19 @@ inline bool isUnit(const Entity& entry) {
 inline vector<Vec2Int> getEntityBorder(Entity& e, unordered_map<EntityType, EntityProperties>& entityProperties) {
     vector<Vec2Int> borders;
     uint sz = entityProperties[e.entityType].size;
+    if (sz == 1) {
+        borders.push_back(e.position);
+        return borders;
+    }
+
     for (uint i = e.position.x; i < e.position.x + sz; ++i) {
-        borders.push_back(Vec2Int(e.position.x, e.position.y));
-        borders.push_back(Vec2Int(e.position.x, e.position.y + sz - 1));
+        borders.push_back(Vec2Int(i, e.position.y));
+        borders.push_back(Vec2Int(i, e.position.y + sz - 1));
     }
 
     for (uint i = e.position.y + 1; i < e.position.y + sz - 1; ++i) {
-        borders.push_back(Vec2Int(e.position.x, e.position.y));
-        borders.push_back(Vec2Int(e.position.x + sz - 1, e.position.y));
+        borders.push_back(Vec2Int(e.position.x, i));
+        borders.push_back(Vec2Int(e.position.x + sz - 1, i));
     }
 
     return borders;

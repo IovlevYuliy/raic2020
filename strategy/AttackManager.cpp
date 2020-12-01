@@ -6,40 +6,44 @@ AttackManager::AttackManager(GameState& state_) {
 }
 
 void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction>& actions) {
-    if (isBuilder(myEntity)) {
+    if (isBuilder(myEntity) && state->resourcesExist) {
         goToResources(myEntity, actions);
-        return;
-    }
-    if (!troopIsReady(myEntity)) {
         return;
     }
 
     uint attackRange = state->entityProperties[myEntity.entityType].attack->attackRange;
+    uint damage = state->entityProperties[myEntity.entityType].attack->damage;
     uint sightRange = state->entityProperties[myEntity.entityType].sightRange;
-    auto defPosition = needDefense();
-    if (defPosition) {
-        if (defPosition.value().dist(myEntity.position) < 2 * DEFENSE_THRESHOLD) {
-            actions[myEntity.id] = EntityAction(
-                MoveAction(defPosition.value(), true, false),
-                AttackAction(
-                    {},
-                    AutoAttack(sightRange, vector<EntityType>())
-                )
-            );
-        }
+
+    auto targets = getTarget(myEntity);
+    if (targets.first) {
+        targets.first->health -= damage;
+        actions[myEntity.id] = EntityAction(
+            {},
+            AttackAction(targets.first->id, {})
+        );
         return;
     }
 
-    auto target = getNearestTarget(myEntity, state->enemyBuildings, state->entityProperties);
-    if (target.first == 1e9) {
-        target = getNearestTarget(myEntity, state->others, state->entityProperties);
+    if (isTurret(myEntity)) {
+        actions[myEntity.id] = EntityAction(
+            {},
+            AttackAction({}, AutoAttack(sightRange, vector<EntityType>()))
+        );
+
+        return;
     }
 
-    if (target.first != 1e9 && !isOutOfMap(target.second.first, state->mapSize)) {
-        auto mvAction = MoveAction(target.second.first, true, false);
+    if (rand() % 5 == 0) {
+        actions[myEntity.id] = EntityAction();
+        return;
+    }
+
+    if (targets.second) {
+        auto mvAction = MoveAction(targets.second->position, true, false);
         auto attackAction = AttackAction(
             {},
-            AutoAttack(attackRange, vector<EntityType>())
+            AutoAttack(sightRange, vector<EntityType>())
         );
 
         actions[myEntity.id] = EntityAction(mvAction, attackAction);
@@ -56,25 +60,50 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
     }
 }
 
-bool AttackManager::troopIsReady(Entity& myEntity) {
-    Vec2Int pos(myEntity.position.x, myEntity.position.y - 1);
-    uint& mapSize = state->mapSize;
-    if (isOutOfMap(pos, mapSize) ||
-            state->gameMap[myEntity.position.x][myEntity.position.y - 1] != EntityType::RANGED_BASE) {
-        return true;
-    }
+pair<Entity*, Entity*> AttackManager::getTarget(Entity& myEntity) {
+    uint attackRange = state->entityProperties[myEntity.entityType].attack->attackRange;
+    Entity* targetInRange = NULL;
+    Entity* nearestTarget = NULL;
+    uint minDist = 1e9;
+    uint minHp = 1e9;
 
-    uint baseSize = state->entityProperties[EntityType::RANGED_BASE].size;
-    pos.y = myEntity.position.y;
-    uint troopSize = 0;
-    for(uint i = myEntity.position.x - baseSize; i < myEntity.position.x + baseSize; ++i) {
-        pos.x = i;
-        if (!isOutOfMap(pos, mapSize) && state->gameMap[pos.x][pos.y] == EntityType::RANGED_UNIT) {
-            troopSize++;
+    for (auto& enemy: state->others) {
+        if (enemy.health <= 0) continue;
+
+        uint dist = myEntity.position.dist(enemy.position);
+
+        if (enemy.health < minHp && dist <= attackRange) {
+            minHp = enemy.health;
+            targetInRange = &enemy;
+        }
+
+        if (dist < minDist) {
+            minDist = dist;
+            nearestTarget = &enemy;
         }
     }
 
-    return troopSize >= 5;
+    if (targetInRange) {
+        return make_pair(targetInRange, nearestTarget);
+    }
+
+    for (auto& enemy : state->enemyBuildings) {
+        if (enemy.health <= 0) continue;
+
+        auto dist = getDistance(myEntity, enemy, state->entityProperties);
+
+        if (enemy.health < minHp && dist.first <= attackRange) {
+            minHp = enemy.health;
+            targetInRange = &enemy;
+        }
+
+        if (dist.first < minDist) {
+            minDist = dist.first;
+            nearestTarget = &enemy;
+        }
+    }
+
+    return make_pair(targetInRange, nearestTarget);
 }
 
 optional<Vec2Int> AttackManager::needDefense() {

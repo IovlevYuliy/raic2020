@@ -17,8 +17,20 @@ uint Vec2Int::dist(const Vec2Int& to) const {
     return abs(x - to.x) + abs(y - to.y);
 }
 
+uint Vec2Int::sqrDist(const Vec2Int& to) const {
+    return (x - to.x) * (x - to.x) + (y - to.y) * (y - to.y);
+}
+
 bool Vec2Int::operator ==(const Vec2Int& other) const {
     return x == other.x && y == other.y;
+}
+
+bool Vec2Int::operator <(const Vec2Int& other) const {
+    if (x != other.x) {
+        return x < other.x;
+    }
+
+    return y < other.y;
 }
 
 size_t std::hash<Vec2Int>::operator ()(const Vec2Int& value) const {
