@@ -17,9 +17,9 @@
 using namespace std;
 
 const float MAX_BUILDERS_PERCENTAGE = 0.4;
-const int MAX_RANGED_BASE = 4;
+const int MAX_RANGED_BASE = 3;
 const int MAX_BUILDER_BASE = 1;
-const int MAX_BUILDERS = 30;
+const int MAX_BUILDERS = 45;
 const int BUILDER_DELAY_TICKS = 10;
 const int DEFENSE_THRESHOLD = 20;
 

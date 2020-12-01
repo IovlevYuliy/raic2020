@@ -31,34 +31,27 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
     }
 
     auto target = getNearestTarget(myEntity, state->enemyBuildings, state->entityProperties);
-    if (target.first <= attackRange && target.second.second->health > 0) {
-        uint damage = state->entityProperties[myEntity.entityType].attack->damage;
-        actions[myEntity.id] = EntityAction(
-            {},
-            AttackAction(target.second.second->id, {})
-        );
-
-        target.second.second->health -= damage;
-        return;
-    }
-
-    if (target.first == 1e9 || target.second.second->health <= 0) {
+    if (target.first == 1e9) {
         target = getNearestTarget(myEntity, state->others, state->entityProperties);
     }
 
-    if (target.first != 1e9) {
+    if (target.first != 1e9 && !isOutOfMap(target.second.first, state->mapSize)) {
         auto mvAction = MoveAction(target.second.first, true, false);
         auto attackAction = AttackAction(
             {},
-            AutoAttack(attackRange, vector<EntityType>{EntityType::RANGED_UNIT, EntityType::MELEE_UNIT, EntityType::BUILDER_UNIT})
+            AutoAttack(attackRange, vector<EntityType>())
         );
 
         actions[myEntity.id] = EntityAction(mvAction, attackAction);
     } else {
-        uint& mapSize = state->mapSize;
+        uint mapSize = state->mapSize;
         Vec2Int corner(mapSize - 1, mapSize - 1);
         actions[myEntity.id] = EntityAction(
-            MoveAction(Vec2Int(mapSize - 1, mapSize - 1), true, false)
+            MoveAction(corner, true, false),
+            AttackAction(
+                {},
+                AutoAttack(attackRange, vector<EntityType>())
+            )
         );
     }
 }
@@ -119,11 +112,10 @@ void AttackManager::goToResources(Entity& myEntity, unordered_map<int, EntityAct
 
             if (state->gameMap[to.x][to.y] == EntityType::RESOURCE) {
                 actions[myEntity.id] = EntityAction(
-                    MoveAction(to, true, false),
+                    MoveAction(to, true, true),
                     AttackAction(
                         {},
-                        AutoAttack(attackRange, vector<EntityType>{})));
-
+                        AutoAttack(attackRange, vector<EntityType>{EntityType::RESOURCE, EntityType::BUILDER_UNIT})));
                 return;
             } else if(state->gameMap[to.x][to.y] == -1) {
                 visited.insert(to);

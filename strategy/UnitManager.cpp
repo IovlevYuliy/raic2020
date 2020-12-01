@@ -39,11 +39,13 @@ void UnitManager::createRanger(Entity& rangerBase, unordered_map<int, EntityActi
     uint baseSize = state->entityProperties[EntityType::RANGED_BASE].size;
     for (uint i = 0; i < baseSize; ++i) {
         auto target = Vec2Int(rangerBase.position.x + i, rangerBase.position.y + baseSize);
+        if (isOutOfMap(target, state->mapSize)) {
+            continue;
+        }
         if (state->gameMap[target.x][target.y] == -1) {
             actions[rangerBase.id] = EntityAction(
-                {}, // move
-                BuildAction(EntityType::RANGED_UNIT, target)
-            );
+                {},  // move
+                BuildAction(EntityType::RANGED_UNIT, target));
             return;
         }
     }

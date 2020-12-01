@@ -3,9 +3,11 @@
 GameState::GameState() {}
 
 void GameState::parsePlayerView(const PlayerView& playerView) {
-    // getSplittedEntities(playerView);
     entityProperties = playerView.entityProperties;
+    currentTick = playerView.currentTick;
+
     restoreGameMap(playerView);
+    splitEntities(playerView);
 
     calcPopulationStats();
 

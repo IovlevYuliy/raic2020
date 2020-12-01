@@ -21,7 +21,7 @@ optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& 
     auto foundPlace = findPlace(builder.position, size);
     if (foundPlace.has_value()) {
         actions[builder.id] = EntityAction(
-            MoveAction(Vec2Int(foundPlace.value().x - 1, foundPlace.value().y), true,false),
+            MoveAction(Vec2Int(foundPlace.value().x, foundPlace.value().y), true,false),
             BuildAction(buildingType, foundPlace.value())
         );
 
@@ -44,7 +44,7 @@ void BuildingManager::repairBuildings(unordered_map<int, EntityAction>& actions)
         auto res = getNearestBuilder(entry);
         if (res.first.x != -1) {
             actions[res.second.id] = EntityAction(
-                MoveAction(Vec2Int(res.first.x - 1, res.first.y), true,false),
+                MoveAction(Vec2Int(res.first.x, res.first.y), true, false),
                 {}, // build
                 {}, // attack
                 RepairAction(entry.id)

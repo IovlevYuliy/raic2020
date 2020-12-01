@@ -8,7 +8,7 @@ MyStrategy::MyStrategy() {
 }
 
 Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debugInterface) {
-    // const clock_t total_begin_time = clock();
+    const clock_t total_begin_time = clock();
     state.parsePlayerView(playerView);
 
     unordered_map<int, EntityAction> actions;
@@ -37,8 +37,8 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
 
     buildingManager->repairBuildings(actions);
 
-    // totalGameTime += float(clock() - total_begin_time) / CLOCKS_PER_SEC;
-    // cerr << "Total game time " << totalGameTime << endl;
+    totalGameTime += float(clock() - total_begin_time) / CLOCKS_PER_SEC;
+    cerr << "Total game time " << totalGameTime << endl;
 
     return Action(actions);
 }
