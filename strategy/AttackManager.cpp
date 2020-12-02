@@ -6,7 +6,7 @@ AttackManager::AttackManager(GameState& state_) {
 }
 
 void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction>& actions) {
-    if (isBuilder(myEntity) && state->resourcesExist) {
+    if (isBuilder(myEntity) && state->remainingResources) {
         goToResources(myEntity, actions);
         return;
     }
@@ -40,13 +40,9 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
     }
 
     if (targets.second) {
-        auto mvAction = MoveAction(targets.second->position, true, false);
-        auto attackAction = AttackAction(
-            {},
-            AutoAttack(sightRange, vector<EntityType>())
+        actions[myEntity.id] = EntityAction(
+            MoveAction(targets.second->position, true, false)
         );
-
-        actions[myEntity.id] = EntityAction(mvAction, attackAction);
     } else {
         uint mapSize = state->mapSize;
         Vec2Int corner(mapSize - 1, mapSize - 1);

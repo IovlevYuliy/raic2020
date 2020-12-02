@@ -21,7 +21,8 @@ void UnitManager::createUnits(unordered_map<int, EntityAction>& actions, EntityT
 void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAction>& actions, bool force) {
     if ((state->currentTick > 400 &&
             state->curBuilderCount >= state->totalPopulation * MAX_BUILDERS_PERCENTAGE) ||
-            state->curBuilderCount >= MAX_BUILDERS || !state->resourcesExist) {
+            state->curBuilderCount >= MAX_BUILDERS ||
+            state->remainingResources <= RESOURCE_THRESHOLD) {
         actions[builderBase.id] = EntityAction();
         return;
     }

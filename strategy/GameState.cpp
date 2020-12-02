@@ -13,7 +13,7 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
 
     for (auto& pl : playerView.players) {
         if (pl.id == playerView.myId) {
-            resources = pl.resource;
+            myResources = pl.resource;
         }
     }
 }
@@ -45,7 +45,7 @@ void GameState::splitEntities(const PlayerView& playerView) {
     enemyBuildings.clear();
     others.clear();
 
-    resourcesExist = false;
+    remainingResources = 0;
     for (auto& entry : playerView.entities) {
         if (entry.playerId && *entry.playerId == playerView.myId) {
             myEntities.push_back(entry);
@@ -61,7 +61,7 @@ void GameState::splitEntities(const PlayerView& playerView) {
                 others.push_back(entry);
             }
         }
-        resourcesExist = resourcesExist || (entry.entityType == EntityType::RESOURCE);
+        remainingResources += (entry.entityType == EntityType::RESOURCE);
     }
 }
 

@@ -26,12 +26,12 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         buildingManager->createBuilding(actions, EntityType::HOUSE);
     }
 
-    if (state.resources > state.entityProperties[EntityType::RANGED_BASE].cost &&
+    if (state.myResources > state.entityProperties[EntityType::RANGED_BASE].cost &&
             state.rangedBaseCount < MAX_RANGED_BASE && state.totalPopulation > 50 * state.rangedBaseCount) {
         buildingManager->createBuilding(actions, EntityType::RANGED_BASE);
     }
 
-    if (state.resources > state.entityProperties[EntityType::BUILDER_BASE].cost &&
+    if (state.myResources > state.entityProperties[EntityType::BUILDER_BASE].cost &&
             state.builderBaseCount < MAX_BUILDER_BASE) {
         buildingManager->createBuilding(actions, EntityType::BUILDER_BASE);
     }

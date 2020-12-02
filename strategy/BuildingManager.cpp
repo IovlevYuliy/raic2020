@@ -15,7 +15,7 @@ optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& 
     optional<Vec2Int> foundPlace = findPlace(Vec2Int(0, 0), size);
 
     if (foundPlace) {
-        auto builders = getNearestBuilders(foundPlace.value(), 1);
+        auto builders = getNearestBuilders(foundPlace.value(), repairBuilderCount[buildingType]);
 
         for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
             actions[builders[i]->id] = EntityAction(
@@ -75,7 +75,7 @@ pair<Vec2Int, Entity> BuildingManager::getNearestBuilder(Entity& destEntity) {
     Vec2Int pos;
     bool avoidStuck = rand() % 50 == 0;
 
-    for (uint i = 0; i < (uint)state->myEntities.size(); ++i) {
+    for (uint i = 0; i < static_cast<uint>(state->myEntities.size()); ++i) {
         if (!isBuilder(state->myEntities[i])) {
             continue;
         }
