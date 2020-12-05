@@ -15,14 +15,33 @@ void UnitManager::createUnits(unordered_map<int, EntityAction>& actions, EntityT
         if (entry.entityType == EntityType::RANGED_BASE && unitType == EntityType::RANGED_UNIT) {
             createRanger(entry, actions);
         }
+
+        if (entry.entityType == EntityType::MELEE_BASE && unitType == EntityType::MELEE_UNIT) {
+            createMelee(entry, actions);
+        }
+    }
+}
+
+void UnitManager::stop(unordered_map<int, EntityAction>& actions, EntityType unitType) {
+    for (auto& entry : state->myBases) {
+        if (entry.entityType == EntityType::RANGED_BASE && unitType == EntityType::RANGED_UNIT) {
+            actions[entry.id] = EntityAction();
+            continue;
+        }
+
+        if (entry.entityType == EntityType::MELEE_BASE && unitType == EntityType::MELEE_UNIT) {
+            actions[entry.id] = EntityAction();
+            continue;
+        }
     }
 }
 
 void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAction>& actions, bool force) {
-    if ((state->currentTick > 400 &&
+    if ((state->currentTick > 200 &&
             state->curBuilderCount >= state->totalPopulation * MAX_BUILDERS_PERCENTAGE) ||
             state->curBuilderCount >= MAX_BUILDERS ||
-            state->remainingResources <= RESOURCE_THRESHOLD) {
+            state->remainingResources <= RESOURCE_THRESHOLD ||
+            state->distToBase <= DEFENSE_THRESHOLD) {
         actions[builderBase.id] = EntityAction();
         return;
     }
@@ -44,6 +63,18 @@ void UnitManager::createRanger(Entity& rangerBase, unordered_map<int, EntityActi
         BuildAction(
             EntityType::RANGED_UNIT,
             Vec2Int(rangerBase.position.x + baseSize, rangerBase.position.y)
+        )
+    );
+}
+
+void UnitManager::createMelee(Entity& meleeBase, unordered_map<int, EntityAction>& actions) {
+    uint baseSize = state->entityProperties[EntityType::MELEE_BASE].size;
+
+    actions[meleeBase.id] = EntityAction(
+        {},  // move
+        BuildAction(
+            EntityType::MELEE_UNIT,
+            Vec2Int(meleeBase.position.x + baseSize, meleeBase.position.y)
         )
     );
 }

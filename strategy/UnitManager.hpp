@@ -18,6 +18,10 @@ public:
         bool force = false);
 
     void createRanger(Entity& rangerBase, unordered_map<int, EntityAction>& actions);
+
+    void createMelee(Entity& meleeBase, unordered_map<int, EntityAction>& actions);
+
+    void stop(unordered_map<int, EntityAction>& actions, EntityType unitType);
 };
 
 #endif

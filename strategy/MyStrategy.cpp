@@ -13,12 +13,28 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
 
     unordered_map<int, EntityAction> actions;
     unitManager->createUnits(actions, EntityType::BUILDER_UNIT);
-    unitManager->createUnits(actions, EntityType::RANGED_UNIT);
+    if (state.rangedBaseCount && state.meleeBaseCount) {
+        if (state.rangerCost > 2 * state.meleeCost) {
+            unitManager->stop(actions, EntityType::RANGED_UNIT);
+            unitManager->createUnits(actions, EntityType::MELEE_UNIT);
+        } else {
+            unitManager->stop(actions, EntityType::MELEE_UNIT);
+            unitManager->createUnits(actions, EntityType::RANGED_UNIT);
+        }
+    } else {
+        unitManager->createUnits(actions, EntityType::RANGED_UNIT);
+        unitManager->createUnits(actions, EntityType::MELEE_UNIT);
+    }
 
-    for (auto& entry : state.myEntities) {
-        if (isUnit(entry) || isTurret(entry)) {
+    for (auto& entry : state.mySoldiers) {
+        attackManager->goToAttack(entry, actions);
+    }
+    for (auto& entry : state.myBuilders) {
+        attackManager->goToAttack(entry, actions);
+    }
+    for (auto& entry : state.myBuildings) {
+        if (isTurret(entry)) {
             attackManager->goToAttack(entry, actions);
-            continue;
         }
     }
 
@@ -26,12 +42,12 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         buildingManager->createBuilding(actions, EntityType::HOUSE);
     }
 
-    if (state.myResources > state.entityProperties[EntityType::RANGED_BASE].cost &&
-            state.rangedBaseCount < MAX_RANGED_BASE && state.totalPopulation > 50 * state.rangedBaseCount) {
+    if (state.myResources > state.entityProperties[EntityType::RANGED_BASE].initialCost &&
+            state.rangedBaseCount < MAX_RANGED_BASE) {
         buildingManager->createBuilding(actions, EntityType::RANGED_BASE);
     }
 
-    if (state.myResources > state.entityProperties[EntityType::BUILDER_BASE].cost &&
+    if (state.myResources > state.entityProperties[EntityType::BUILDER_BASE].initialCost &&
             state.builderBaseCount < MAX_BUILDER_BASE) {
         buildingManager->createBuilding(actions, EntityType::BUILDER_BASE);
     }

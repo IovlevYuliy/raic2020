@@ -15,7 +15,7 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
     uint damage = state->entityProperties[myEntity.entityType].attack->damage;
     uint sightRange = state->entityProperties[myEntity.entityType].sightRange;
 
-    auto targets = getTarget(myEntity);
+    auto targets = getTargets(myEntity);
     if (targets.first) {
         targets.first->health -= damage;
         actions[myEntity.id] = EntityAction(
@@ -34,10 +34,17 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
         return;
     }
 
-    if (rand() % 5 == 0) {
-        actions[myEntity.id] = EntityAction();
+    if (state->currentTick < 60) {
+        actions[myEntity.id] = EntityAction(
+            MoveAction(Vec2Int(20, 20), true, false)
+        );
         return;
     }
+
+    // if (rand() % 5 == 0) {
+    //     actions[myEntity.id] = EntityAction();
+    //     return;
+    // }
 
     if (targets.second) {
         actions[myEntity.id] = EntityAction(
@@ -56,14 +63,34 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
     }
 }
 
-pair<Entity*, Entity*> AttackManager::getTarget(Entity& myEntity) {
+pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
     uint attackRange = state->entityProperties[myEntity.entityType].attack->attackRange;
     Entity* targetInRange = NULL;
     Entity* nearestTarget = NULL;
     uint minDist = 1e9;
     uint minHp = 1e9;
 
-    for (auto& enemy: state->others) {
+    for (auto& enemy: state->enemySoldiers) {
+        if (enemy.health <= 0) continue;
+
+        uint dist = myEntity.position.dist(enemy.position);
+
+        if (enemy.health < minHp && dist <= attackRange) {
+            minHp = enemy.health;
+            targetInRange = &enemy;
+        }
+
+        if (dist < minDist) {
+            minDist = dist;
+            nearestTarget = &enemy;
+        }
+    }
+
+    if (targetInRange) {
+        return make_pair(targetInRange, nearestTarget);
+    }
+
+    for (auto& enemy: state->enemyBuilders) {
         if (enemy.health <= 0) continue;
 
         uint dist = myEntity.position.dist(enemy.position);
@@ -100,19 +127,6 @@ pair<Entity*, Entity*> AttackManager::getTarget(Entity& myEntity) {
     }
 
     return make_pair(targetInRange, nearestTarget);
-}
-
-optional<Vec2Int> AttackManager::needDefense() {
-    for (auto& enemy : state->others) {
-        for (auto& myBase : state->myBases) {
-            auto res = getDistance(enemy, myBase, state->entityProperties);
-            if (res.first < DEFENSE_THRESHOLD) {
-                return enemy.position;
-            }
-        }
-    }
-
-    return {};
 }
 
 void AttackManager::goToResources(Entity& myEntity, unordered_map<int, EntityAction>& actions) {

@@ -16,6 +16,11 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
             myResources = pl.resource;
         }
     }
+
+    calcTargets();
+    sort(mySoldiers.begin(), mySoldiers.end(), [](Entity& x, Entity& y){
+        return x.targets < y.targets;
+    });
 }
 
 void GameState::restoreGameMap(const PlayerView& playerView) {
@@ -39,26 +44,42 @@ void GameState::restoreGameMap(const PlayerView& playerView) {
 }
 
 void GameState::splitEntities(const PlayerView& playerView) {
-    myEntities.clear();
+    myBuilders.clear();
+    mySoldiers.clear();
+    myBuildings.clear();
     myBases.clear();
 
     enemyBuildings.clear();
-    others.clear();
+    enemySoldiers.clear();
+    enemyBuilders.clear();
 
     remainingResources = 0;
     for (auto& entry : playerView.entities) {
         if (entry.playerId && *entry.playerId == playerView.myId) {
-            myEntities.push_back(entry);
-            myEntities.back().busy = false;
-            if (isBase(entry.entityType)) {
-                myBases.push_back(entry);
+            if (isBuilding(entry.entityType)) {
+                myBuildings.push_back(entry);
+
+                if (isBase(entry.entityType)) {
+                    myBases.push_back(entry);
+                }
+                continue;
+            }
+
+            if (isBuilder(entry)) {
+                myBuilders.push_back(entry);
+            } else {
+                mySoldiers.push_back(entry);
             }
         }
         if (entry.playerId && *entry.playerId != playerView.myId) {
             if (isBuilding(entry.entityType)) {
                 enemyBuildings.push_back(entry);
+                continue;
+            }
+            if (isBuilder(entry)){
+                enemyBuilders.push_back(entry);
             } else {
-                others.push_back(entry);
+                enemySoldiers.push_back(entry);
             }
         }
         remainingResources += (entry.entityType == EntityType::RESOURCE);
@@ -68,17 +89,54 @@ void GameState::splitEntities(const PlayerView& playerView) {
 void GameState::calcPopulationStats() {
     totalPopulation = 0;
     usedPopulation = 0;
-    curBuilderCount = 0;
     rangedBaseCount = 0;
     builderBaseCount = 0;
     meleeBaseCount = 0;
+    curRangerCount = 0;
+    curMeleeCount = 0;
+    curBuilderCount = static_cast<uint>(myBuilders.size());
 
-    for (auto& entry : myEntities) {
-        totalPopulation += entityProperties[entry.entityType].populationProvide;
-        usedPopulation += entityProperties[entry.entityType].populationUse;
-        curBuilderCount += isBuilder(entry);
+    for (auto& entry: myBuildings) {
         rangedBaseCount += (entry.entityType == EntityType::RANGED_BASE);
         builderBaseCount += (entry.entityType == EntityType::BUILDER_BASE);
         meleeBaseCount += (entry.entityType == EntityType::MELEE_BASE);
+        totalPopulation += entityProperties[entry.entityType].populationProvide;
+    }
+
+    for (auto& entry: mySoldiers) {
+        curRangerCount += (entry.entityType == EntityType::RANGED_UNIT);
+        curMeleeCount += (entry.entityType == EntityType::MELEE_UNIT);
+    }
+
+    usedPopulation += entityProperties[EntityType::BUILDER_UNIT].populationUse * curBuilderCount;
+    usedPopulation += entityProperties[EntityType::RANGED_UNIT].populationUse * curRangerCount;
+    usedPopulation += entityProperties[EntityType::MELEE_UNIT].populationUse * curMeleeCount;
+
+    builderCost = entityProperties[EntityType::BUILDER_UNIT].initialCost + curBuilderCount;
+    rangerCost = entityProperties[EntityType::RANGED_UNIT].initialCost + curRangerCount;
+    meleeCost = entityProperties[EntityType::MELEE_UNIT].initialCost + curMeleeCount;
+}
+
+void GameState::calcTargets() {
+    for (auto& entry: mySoldiers) {
+        entry.targets = 0;
+        uint attackRange = entityProperties[entry.entityType].attack->attackRange;
+        for (auto& enemy: enemySoldiers) {
+            if(entry.position.dist(enemy.position) <= attackRange) {
+                entry.targets++;
+            }
+        }
+        for (auto& enemy: enemyBuilders) {
+            if(entry.position.dist(enemy.position) <= attackRange) {
+                entry.targets++;
+            }
+        }
+    }
+    distToBase = 1e9;
+    for (auto& entry: myBases) {
+        for (auto& enemy: enemySoldiers) {
+            auto res = getDistance(enemy, entry, entityProperties);
+            distToBase = min(res.first, distToBase);
+        }
     }
 }

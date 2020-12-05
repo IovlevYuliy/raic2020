@@ -7,10 +7,13 @@ class GameState {
 public:
     unordered_map<EntityType, EntityProperties> entityProperties;
 
-    vector<Entity> myEntities;
+    vector<Entity> myBuilders;
+    vector<Entity> mySoldiers;
     vector<Entity> myBases;
+    vector<Entity> myBuildings;
 
-    vector<Entity> others;
+    vector<Entity> enemySoldiers;
+    vector<Entity> enemyBuilders;
     vector<Entity> enemyBuildings;
 
     vector<vector<char> >gameMap;
@@ -19,14 +22,22 @@ public:
     uint totalPopulation;
     uint usedPopulation;
     uint curBuilderCount;
+    uint curRangerCount;
+    uint curMeleeCount;
 
     uint rangedBaseCount;
     uint builderBaseCount;
     uint meleeBaseCount;
 
+    uint rangerCost;
+    uint meleeCost;
+    uint builderCost;
+
     uint remainingResources;
     uint myResources;
     uint currentTick;
+
+    uint distToBase;
 
     GameState();
 
@@ -35,6 +46,8 @@ public:
     void restoreGameMap(const PlayerView& playerView);
 
     void splitEntities(const PlayerView& playerView);
+
+    void calcTargets();
 
     void calcPopulationStats();
 };

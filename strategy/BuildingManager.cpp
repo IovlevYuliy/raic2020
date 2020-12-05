@@ -30,7 +30,7 @@ optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& 
 
 void BuildingManager::repairBuildings(unordered_map<int, EntityAction>& actions) {
     vector<Entity> buildingsForRepair;
-    for (auto& entry : state->myEntities) {
+    for (auto& entry : state->myBuildings) {
         if (isRepairingBuilding(entry) &&
                 entry.health < state->entityProperties[entry.entityType].maxHealth) {
             buildingsForRepair.push_back(entry);
@@ -51,11 +51,8 @@ void BuildingManager::repairBuildings(unordered_map<int, EntityAction>& actions)
 
 vector<Entity*> BuildingManager::getNearestBuilders(Vec2Int pos, uint count) {
     vector<pair<int, int>> q;
-    for (uint i = 0; i < static_cast<uint>(state->myEntities.size()); ++i) {
-        if (!isBuilder(state->myEntities[i])) {
-            continue;
-        }
-        uint sqrDist = pos.sqrDist(state->myEntities[i].position);
+    for (uint i = 0; i < static_cast<uint>(state->myBuilders.size()); ++i) {
+        uint sqrDist = pos.sqrDist(state->myBuilders[i].position);
         q.push_back(make_pair(sqrDist, i));
     }
     sort(q.begin(), q.end());
@@ -63,7 +60,7 @@ vector<Entity*> BuildingManager::getNearestBuilders(Vec2Int pos, uint count) {
     count = min(count, static_cast<uint>(q.size()));
     vector<Entity*> builders;
     for (uint i = 0; i < count; ++i) {
-        builders.push_back(&state->myEntities[q[i].second]);
+        builders.push_back(&state->myBuilders[q[i].second]);
     }
 
     return builders;
@@ -75,19 +72,16 @@ pair<Vec2Int, Entity> BuildingManager::getNearestBuilder(Entity& destEntity) {
     Vec2Int pos;
     bool avoidStuck = rand() % 50 == 0;
 
-    for (uint i = 0; i < static_cast<uint>(state->myEntities.size()); ++i) {
-        if (!isBuilder(state->myEntities[i])) {
-            continue;
-        }
-        auto res = getDistance(state->myEntities[i], destEntity, state->entityProperties);
+    for (uint i = 0; i < static_cast<uint>(state->myBuilders.size()); ++i) {
+        auto res = getDistance(state->myBuilders[i], destEntity, state->entityProperties);
         if (avoidStuck) {
-            return make_pair(res.second, state->myEntities[i]);
+            return make_pair(res.second, state->myBuilders[i]);
         }
 
         if (res.first < minDist) {
             minDist = res.first;
             pos = res.second;
-            foundBuilder = state->myEntities[i];
+            foundBuilder = state->myBuilders[i];
         }
     }
 
