@@ -16,6 +16,7 @@ public:
     void writeTo(OutputStream& stream) const;
     bool operator ==(const Vec2Int& other) const;
     bool operator <(const Vec2Int& other) const;
+    bool operator !=(const Vec2Int& other) const;
 };
 namespace std {
     template<>

@@ -11,6 +11,10 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
     const clock_t total_begin_time = clock();
     state.parsePlayerView(playerView);
 
+    if (debugInterface) {
+        state.drawInfMap(debugInterface);
+    }
+
     unordered_map<int, EntityAction> actions;
     unitManager->createUnits(actions, EntityType::BUILDER_UNIT);
     if (state.rangedBaseCount && state.meleeBaseCount) {

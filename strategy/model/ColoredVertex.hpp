@@ -7,14 +7,15 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <optional>
 
 class ColoredVertex {
 public:
-    std::shared_ptr<Vec2Float> worldPos;
+    std::optional<Vec2Float> worldPos;
     Vec2Float screenOffset;
     Color color;
     ColoredVertex();
-    ColoredVertex(std::shared_ptr<Vec2Float> worldPos, Vec2Float screenOffset, Color color);
+    ColoredVertex(std::optional<Vec2Float> worldPos, Vec2Float screenOffset, Color color);
     static ColoredVertex readFrom(InputStream& stream);
     void writeTo(OutputStream& stream) const;
 };

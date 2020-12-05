@@ -132,9 +132,9 @@ pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
 void AttackManager::goToResources(Entity& myEntity, unordered_map<int, EntityAction>& actions) {
     uint& mapSize = state->mapSize;
     queue<Vec2Int> q;
-    unordered_set<Vec2Int> visited;
+    unordered_map<Vec2Int, Vec2Int> visited;
     q.push(myEntity.position);
-    visited.insert(myEntity.position);
+    visited[myEntity.position] = myEntity.position;
 
     uint attackRange = state->entityProperties[myEntity.entityType].attack->attackRange;
     uint it = 0;
@@ -145,21 +145,35 @@ void AttackManager::goToResources(Entity& myEntity, unordered_map<int, EntityAct
 
         for (uint i = 0; i < 4; ++i) {
             Vec2Int to(v.x + dx[i], v.y + dy[i]);
-            if (isOutOfMap(to, mapSize) || visited.count(to)) {
+            if (isOutOfMap(to, mapSize) || visited.count(to) || state->infMap[to.x][to.y] < 0) {
                 continue;
             }
 
             if (state->gameMap[to.x][to.y] == EntityType::RESOURCE) {
-                actions[myEntity.id] = EntityAction(
-                    MoveAction(to, true, true),
-                    AttackAction(
+                visited[to] = v;
+                while (visited[to] != myEntity.position) {
+                    to = visited[to];
+                }
+                if (state->gameMap[to.x][to.y] == EntityType::RESOURCE) {
+                    actions[myEntity.id] = EntityAction(
                         {},
-                        AutoAttack(attackRange, vector<EntityType>{EntityType::RESOURCE, EntityType::BUILDER_UNIT})));
+                        AttackAction(
+                            {},
+                            AutoAttack(attackRange, vector<EntityType>{EntityType::RESOURCE, EntityType::BUILDER_UNIT}))
+                    );
+                    return;
+                }
+                actions[myEntity.id] = EntityAction(MoveAction(to, true, false));
                 return;
             } else if(state->gameMap[to.x][to.y] == -1) {
-                visited.insert(to);
+                visited[to] = v;
                 q.push(to);
             }
         }
     }
+
+    actions[myEntity.id] = EntityAction(
+        {},
+        AttackAction({}, AutoAttack(attackRange, vector<EntityType>()))
+    );
 }

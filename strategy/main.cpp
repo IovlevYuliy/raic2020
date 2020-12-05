@@ -7,8 +7,9 @@
 
 class Runner {
 public:
-    Runner(const std::string& host, int port, const std::string& token)
+    Runner(const std::string& host, int port_, const std::string& token)
     {
+        port = port_;
         std::shared_ptr<TcpStream> tcpStream(new TcpStream(host, port));
         inputStream = getInputStream(tcpStream);
         outputStream = getOutputStream(tcpStream);
@@ -35,6 +36,7 @@ public:
     }
 
 private:
+    int port;
     std::shared_ptr<InputStream> inputStream;
     std::shared_ptr<OutputStream> outputStream;
 };

@@ -11,8 +11,9 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
 
     calcPopulationStats();
 
+    myId = playerView.myId;
     for (auto& pl : playerView.players) {
-        if (pl.id == playerView.myId) {
+        if (pl.id == myId) {
             myResources = pl.resource;
         }
     }
@@ -21,6 +22,8 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
     sort(mySoldiers.begin(), mySoldiers.end(), [](Entity& x, Entity& y){
         return x.targets < y.targets;
     });
+
+    createInfluenceMap();
 }
 
 void GameState::restoreGameMap(const PlayerView& playerView) {
@@ -137,6 +140,93 @@ void GameState::calcTargets() {
         for (auto& enemy: enemySoldiers) {
             auto res = getDistance(enemy, entry, entityProperties);
             distToBase = min(res.first, distToBase);
+        }
+    }
+}
+
+void GameState::createInfluenceMap() {
+    infMap.resize(mapSize);
+    infMap.assign(mapSize, vector<int>(mapSize, 0));
+    for (auto& enemy: enemySoldiers) {
+       fillInfluence(enemy);
+    }
+    for (auto& entry: mySoldiers) {
+       fillInfluence(entry);
+    }
+    for (auto& entry: myBuildings) {
+       fillInfluence(entry);
+    }
+    for (auto& entry: enemyBuildings) {
+       fillInfluence(entry);
+    }
+}
+
+void GameState::fillInfluence(Entity& entity) {
+    if (isTurret(entity)) {
+        int sz = entityProperties[entity.entityType].size;
+        int range = entityProperties[entity.entityType].attack->attackRange;
+        int sign = *entity.playerId == myId ? 1 : -1;
+        Vec2Int pos;
+        for (int i = entity.position.x - range; i <= entity.position.x + sz + range; ++i) {
+            for (int j = entity.position.y - range; j <= entity.position.y + sz + range; ++j) {
+                pos.x = i;
+                pos.y = j;
+                if (isOutOfMap(pos, mapSize)) {
+                    continue;
+                }
+                int dist = min(abs(i - entity.position.x), abs(i - entity.position.x - sz + 1)) +
+                           min(abs(j - entity.position.y), abs(j - entity.position.y - sz + 1));
+                if (dist <= range) {
+                    infMap[pos.x][pos.y] += sign * (range + 1 - dist);
+                }
+            }
+        }
+        return;
+    }
+
+    if (isBuilding(entity.entityType)) {
+        int sz = entityProperties[entity.entityType].size;
+        int range = 5;
+        Vec2Int pos;
+        for (int i = entity.position.x - range; i <= entity.position.x + sz + range; ++i) {
+            for (int j = entity.position.y - range; j <= entity.position.y + sz + range; ++j) {
+                pos.x = i;
+                pos.y = j;
+                if (isOutOfMap(pos, mapSize)) {
+                    continue;
+                }
+                int dist = min(abs(i - entity.position.x), abs(i - entity.position.x - sz + 1)) +
+                           min(abs(j - entity.position.y), abs(j - entity.position.y - sz + 1));
+                if (dist <= range) {
+                    infMap[pos.x][pos.y] ++;
+                }
+            }
+        }
+        return;
+    }
+
+    int range = entityProperties[entity.entityType].attack->attackRange + 1;
+    int sign = *entity.playerId == myId ? 1 : -1;
+    Vec2Int pos;
+    for (int i = -range; i <= range; ++i) {
+        for (int j = -(range - abs(i)); j <= (range - abs(i)); ++j) {
+            pos.x = entity.position.x + i;
+            pos.y = entity.position.y + j;
+            if (!isOutOfMap(pos, mapSize)) {
+                infMap[pos.x][pos.y] += sign * (range + 1 - abs(i) - abs(j));
+            }
+        }
+    }
+}
+
+void GameState::drawInfMap(DebugInterface* debugInterface) {
+    for (uint i = 0; i < mapSize; ++i) {
+        for (uint j = 0; j < mapSize; ++j) {
+            string s = to_string(infMap[i][j]);
+            auto dc = DebugCommand::Add(shared_ptr<DebugData>(new DebugData::PlacedText(
+                ColoredVertex(Vec2Float(i + 0.5, j + 0.5), Vec2Float(0, 0), Color(255, 0, 0, 1)), s, 0, 11)
+            ));
+            debugInterface->send(dc);
         }
     }
 }

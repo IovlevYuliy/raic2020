@@ -25,6 +25,10 @@ bool Vec2Int::operator ==(const Vec2Int& other) const {
     return x == other.x && y == other.y;
 }
 
+bool Vec2Int::operator !=(const Vec2Int& other) const {
+    return !(*this == other);
+}
+
 bool Vec2Int::operator <(const Vec2Int& other) const {
     if (x != other.x) {
         return x < other.x;

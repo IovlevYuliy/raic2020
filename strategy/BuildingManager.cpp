@@ -121,8 +121,9 @@ bool BuildingManager::isFree(Vec2Int& pos, uint size) {
 
     for (uint i = pos.x; i < pos.x + size; ++i) {
         for (uint j = pos.y; j < pos.y + size; ++j) {
-            if (i >= mapSize || j >= mapSize || state->gameMap[i][j] != -1)
+            if (i >= mapSize || j >= mapSize || state->gameMap[i][j] != -1 || state->infMap[i][j] < 0) {
                 return false;
+            }
         }
     }
 
