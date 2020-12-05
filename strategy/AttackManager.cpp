@@ -47,8 +47,9 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
     // }
 
     if (targets.second) {
+        bool breakThrough = myEntity.entityType == EntityType::MELEE_UNIT;
         actions[myEntity.id] = EntityAction(
-            MoveAction(targets.second->position, true, false)
+            MoveAction(targets.second->position, true, breakThrough)
         );
     } else {
         uint mapSize = state->mapSize;

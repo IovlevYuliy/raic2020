@@ -11,14 +11,14 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
     const clock_t total_begin_time = clock();
     state.parsePlayerView(playerView);
 
-    if (debugInterface) {
-        state.drawInfMap(debugInterface);
-    }
+    // if (debugInterface) {
+    //     state.drawInfMap(debugInterface);
+    // }
 
     unordered_map<int, EntityAction> actions;
     unitManager->createUnits(actions, EntityType::BUILDER_UNIT);
     if (state.rangedBaseCount && state.meleeBaseCount) {
-        if (state.rangerCost > 2 * state.meleeCost) {
+        if (state.rangerCost > 3 * state.meleeCost) {
             unitManager->stop(actions, EntityType::RANGED_UNIT);
             unitManager->createUnits(actions, EntityType::MELEE_UNIT);
         } else {
@@ -42,6 +42,12 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         }
     }
 
+    if (state.curBuilderCount >= 8 && state.currentTick < 200 && state.turretCount < 3) {
+        unitManager->stop(actions, EntityType::MELEE_UNIT);
+        unitManager->stop(actions, EntityType::RANGED_UNIT);
+        unitManager->stop(actions, EntityType::BUILDER_UNIT);
+    }
+
     if (state.totalPopulation - state.usedPopulation < 6) {
         buildingManager->createBuilding(actions, EntityType::HOUSE);
     }
@@ -54,6 +60,11 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
     if (state.myResources > state.entityProperties[EntityType::BUILDER_BASE].initialCost &&
             state.builderBaseCount < MAX_BUILDER_BASE) {
         buildingManager->createBuilding(actions, EntityType::BUILDER_BASE);
+    }
+
+    if (state.myResources > state.entityProperties[EntityType::TURRET].initialCost &&
+            state.turretCount < MAX_TURRET) {
+        buildingManager->createBuilding(actions, EntityType::TURRET);
     }
 
     buildingManager->repairBuildings(actions);

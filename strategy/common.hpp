@@ -16,7 +16,8 @@
 
 using namespace std;
 
-const float MAX_BUILDERS_PERCENTAGE = 0.4;
+const float MAX_BUILDERS_PERCENTAGE = 0.5;
+const int MAX_TURRET = 10;
 const int MAX_RANGED_BASE = 1;
 const int MAX_BUILDER_BASE = 1;
 const int MAX_BUILDERS = 45;

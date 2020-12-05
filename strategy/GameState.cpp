@@ -97,12 +97,14 @@ void GameState::calcPopulationStats() {
     meleeBaseCount = 0;
     curRangerCount = 0;
     curMeleeCount = 0;
+    turretCount = 0;
     curBuilderCount = static_cast<uint>(myBuilders.size());
 
     for (auto& entry: myBuildings) {
         rangedBaseCount += (entry.entityType == EntityType::RANGED_BASE);
         builderBaseCount += (entry.entityType == EntityType::BUILDER_BASE);
         meleeBaseCount += (entry.entityType == EntityType::MELEE_BASE);
+        turretCount += (entry.entityType == EntityType::TURRET);
         totalPopulation += entityProperties[entry.entityType].populationProvide;
     }
 
@@ -229,4 +231,20 @@ void GameState::drawInfMap(DebugInterface* debugInterface) {
             debugInterface->send(dc);
         }
     }
+}
+
+int GameState::getRegionInfluence(Vec2Int pos, int range) {
+    Vec2Int cur;
+    int sum = 0;
+    for (int i = -range; i <= range; ++i) {
+        for (int j = -(range - abs(i)); j <= (range - abs(i)); ++j) {
+            cur.x = pos.x + i;
+            cur.y = pos.y + j;
+            if (!isOutOfMap(cur, mapSize)) {
+                sum += infMap[cur.x][cur.y];
+            }
+        }
+    }
+
+    return sum;
 }

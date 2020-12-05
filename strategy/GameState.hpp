@@ -31,6 +31,7 @@ public:
     uint rangedBaseCount;
     uint builderBaseCount;
     uint meleeBaseCount;
+    uint turretCount;
 
     uint rangerCost;
     uint meleeCost;
@@ -51,6 +52,7 @@ public:
     void restoreGameMap(const PlayerView& playerView);
 
     void createInfluenceMap();
+    int getRegionInfluence(Vec2Int pos, int range);
     void fillInfluence(Entity& entity);
 
     void splitEntities(const PlayerView& playerView);

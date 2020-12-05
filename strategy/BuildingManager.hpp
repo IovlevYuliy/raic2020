@@ -4,7 +4,6 @@
 #include "common.hpp"
 #include "GameState.hpp"
 
-
 class BuildingManager {
 public:
     GameState* state;
@@ -28,9 +27,10 @@ public:
     bool isForbidden(Vec2Int& pos);
     bool checkNeighbors(Vec2Int& pos, uint entrySize);
 
-    vector<Entity*> getNearestBuilders(Vec2Int pos, uint count);
+    vector<pair<Entity*, Vec2Int>> getNearestBuilders(Vec2Int pos, uint count, int size);
     pair<Vec2Int, Entity> getNearestBuilder(Entity& destEntity);
-    optional<Vec2Int> findPlace(Vec2Int start, uint size);
+    optional<Vec2Int> findPlace(Vec2Int start, uint size, uint divider = 1);
+    optional<Vec2Int> findTurretPlace(Vec2Int start, uint size);
 };
 
 #endif

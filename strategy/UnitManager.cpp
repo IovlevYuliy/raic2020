@@ -24,6 +24,10 @@ void UnitManager::createUnits(unordered_map<int, EntityAction>& actions, EntityT
 
 void UnitManager::stop(unordered_map<int, EntityAction>& actions, EntityType unitType) {
     for (auto& entry : state->myBases) {
+        if (entry.entityType == EntityType::BUILDER_BASE && unitType == EntityType::BUILDER_UNIT) {
+            actions[entry.id] = EntityAction();
+            continue;
+        }
         if (entry.entityType == EntityType::RANGED_BASE && unitType == EntityType::RANGED_UNIT) {
             actions[entry.id] = EntityAction();
             continue;
@@ -37,7 +41,7 @@ void UnitManager::stop(unordered_map<int, EntityAction>& actions, EntityType uni
 }
 
 void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAction>& actions, bool force) {
-    if ((state->currentTick > 200 &&
+    if ((state->currentTick > 300 &&
             state->curBuilderCount >= state->totalPopulation * MAX_BUILDERS_PERCENTAGE) ||
             state->curBuilderCount >= MAX_BUILDERS ||
             state->remainingResources <= RESOURCE_THRESHOLD ||
