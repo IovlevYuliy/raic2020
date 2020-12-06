@@ -19,7 +19,7 @@ optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& 
     }
 
     if (foundPlace) {
-        auto builders = getNearestBuilders(foundPlace.value(), repairBuilderCount[buildingType], size);
+        auto builders = getNearestBuilders(foundPlace.value(), repairBuilderCount[buildingType] + 1, size);
         for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
             actions[builders[i].first->id] = EntityAction(
                 MoveAction(builders[i].second, true,false),
@@ -41,8 +41,10 @@ void BuildingManager::repairBuildings(unordered_map<int, EntityAction>& actions)
     }
 
     for (auto& entry : buildingsForRepair) {
-        auto builders = getNearestBuilders(entry.position,
-            repairBuilderCount[entry.entityType], state->entityProperties[entry.entityType].size);
+        int diffHp = state->entityProperties[entry.entityType].maxHealth - entry.health;
+        int builderCount = min((diffHp + 4) / 5, repairBuilderCount[entry.entityType] + 1);
+        auto builders = getNearestBuilders(entry.position, builderCount,
+            state->entityProperties[entry.entityType].size);
         for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
             actions[builders[i].first->id] = EntityAction(
                 MoveAction(builders[i].second, true, false),
@@ -63,25 +65,28 @@ vector<pair<Entity*, Vec2Int>> BuildingManager::getNearestBuilders(Vec2Int pos, 
 
     count = min(count, static_cast<uint>(q.size()));
     vector<pair<Entity*, Vec2Int>> builders;
+    auto borders = getBorder(pos, size);
+    vector<bool> used(borders.size(), false);
     for (int i = 0; i < count; ++i) {
-        Vec2Int cur;
-        if (state->myBuilders[q[i].second].position.x >= pos.x && state->myBuilders[q[i].second].position.x < pos.x + size) {
-            cur.x = pos.x;
-        } else if (abs(state->myBuilders[q[i].second].position.x - pos.x) < abs(state->myBuilders[q[i].second].position.x - pos.x - size + 1)) {
-            cur.x = pos.x;
-        } else {
-            cur.x = pos.x + size - 1;
+        if (i && q[i].first > 100) {
+            break;
         }
-
-        if (state->myBuilders[q[i].second].position.y >= pos.y && state->myBuilders[q[i].second].position.y < pos.y + size) {
-            cur.y = pos.y;
-        } else if (abs(state->myBuilders[q[i].second].position.y - pos.y) < abs(state->myBuilders[q[i].second].position.y - pos.y - size + 1)) {
-            cur.y = pos.y;
-        } else {
-            cur.y = pos.y + size - 1;
+        uint minDist = 1e9;
+        uint ind = -1;
+        for (uint j = 0; j < static_cast<uint>(borders.size()); ++j) {
+            if (used[j] || isOutOfMap(borders[j], state->mapSize)) {
+                continue;
+            }
+            auto dist = borders[j].dist(state->myBuilders[q[i].second].position);
+            if (dist < minDist) {
+                minDist = dist;
+                ind = j;
+            }
         }
-
-        builders.push_back(make_pair(&state->myBuilders[q[i].second], cur));
+        if (ind != -1) {
+            used[ind] = true;
+            builders.push_back(make_pair(&state->myBuilders[q[i].second], borders[ind]));
+        }
     }
 
     return builders;

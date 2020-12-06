@@ -34,9 +34,9 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
         return;
     }
 
-    if (state->currentTick < 60) {
+    if (state->currentTick < 200 && (targets.second->position.x > 40 || targets.second->position.y > 40)) {
         actions[myEntity.id] = EntityAction(
-            MoveAction(Vec2Int(20, 20), true, false)
+            MoveAction(Vec2Int(15, 15), true, false)
         );
         return;
     }
@@ -177,4 +177,21 @@ void AttackManager::goToResources(Entity& myEntity, unordered_map<int, EntityAct
         {},
         AttackAction({}, AutoAttack(attackRange, vector<EntityType>()))
     );
+}
+
+Entity* AttackManager::getNearestAlly(Entity& myEntity) {
+    uint minDist = 1e9;
+    Entity* ally;
+    for (auto& entry : state->mySoldiers) {
+        if (entry.id == myEntity.id) {
+            continue;
+        }
+        auto dist = myEntity.position.dist(entry.position);
+        if (dist < minDist) {
+            minDist = dist;
+            ally = &entry;
+        }
+    }
+
+    return ally;
 }

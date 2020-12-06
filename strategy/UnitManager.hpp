@@ -22,6 +22,8 @@ public:
     void createMelee(Entity& meleeBase, unordered_map<int, EntityAction>& actions);
 
     void stop(unordered_map<int, EntityAction>& actions, EntityType unitType);
+
+    Vec2Int getPosition(Entity& base);
 };
 
 #endif

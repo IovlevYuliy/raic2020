@@ -73,30 +73,29 @@ inline bool isUnit(const Entity& entry) {
     return isBuilder(entry) || isRanger(entry) || isMelee(entry);
 }
 
-inline vector<Vec2Int> getEntityBorder(Entity& e, unordered_map<EntityType, EntityProperties>& entityProperties) {
+inline vector<Vec2Int> getBorder(Vec2Int pos, int size) {
     vector<Vec2Int> borders;
-    uint sz = entityProperties[e.entityType].size;
-    if (sz == 1) {
-        borders.push_back(e.position);
+    if (size == 1) {
+        borders.push_back(pos);
         return borders;
     }
 
-    for (uint i = e.position.x; i < e.position.x + sz; ++i) {
-        borders.push_back(Vec2Int(i, e.position.y));
-        borders.push_back(Vec2Int(i, e.position.y + sz - 1));
+    for (uint i = pos.x; i < pos.x + size; ++i) {
+        borders.push_back(Vec2Int(i, pos.y));
+        borders.push_back(Vec2Int(i, pos.y + size - 1));
     }
 
-    for (uint i = e.position.y + 1; i < e.position.y + sz - 1; ++i) {
-        borders.push_back(Vec2Int(e.position.x, i));
-        borders.push_back(Vec2Int(e.position.x + sz - 1, i));
+    for (uint i = pos.y + 1; i < pos.y + size - 1; ++i) {
+        borders.push_back(Vec2Int(pos.x, i));
+        borders.push_back(Vec2Int(pos.x + size - 1, i));
     }
 
     return borders;
 }
 
 inline pair<uint, Vec2Int> getDistance(Entity& e1, Entity& e2, unordered_map<EntityType, EntityProperties>& entityProperties) {
-    vector<Vec2Int> e1Borders = getEntityBorder(e1, entityProperties);
-    vector<Vec2Int> e2Borders = getEntityBorder(e2, entityProperties);
+    vector<Vec2Int> e1Borders = getBorder(e1.position, entityProperties[e1.entityType].size);
+    vector<Vec2Int> e2Borders = getBorder(e2.position, entityProperties[e2.entityType].size);
 
     uint minDist = 1e9;
     Vec2Int destVec;

@@ -45,40 +45,70 @@ void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAc
             state->curBuilderCount >= state->totalPopulation * MAX_BUILDERS_PERCENTAGE) ||
             state->curBuilderCount >= MAX_BUILDERS ||
             state->remainingResources <= RESOURCE_THRESHOLD ||
-            state->distToBase <= DEFENSE_THRESHOLD) {
+            state->distToBase <= DEFENSE_THRESHOLD ||
+            state->myResources < state->builderCost) {
         actions[builderBase.id] = EntityAction();
         return;
     }
 
     uint baseSize = state->entityProperties[EntityType::BUILDER_BASE].size;
+    state->myResources -= state->builderCost;
 
     actions[builderBase.id] = EntityAction(
         {},  // move
         BuildAction(
             EntityType::BUILDER_UNIT,
-            Vec2Int(builderBase.position.x + baseSize, builderBase.position.y)));
+            getPosition(builderBase)
+        ));
 }
 
 void UnitManager::createRanger(Entity& rangerBase, unordered_map<int, EntityAction>& actions) {
-    uint baseSize = state->entityProperties[EntityType::RANGED_BASE].size;
+    if (state->myResources < state->rangerCost) {
+        actions[rangerBase.id] = EntityAction();
+        return;
+    }
 
+    state->myResources -= state->rangerCost;
     actions[rangerBase.id] = EntityAction(
         {},  // move
         BuildAction(
             EntityType::RANGED_UNIT,
-            Vec2Int(rangerBase.position.x + baseSize, rangerBase.position.y)
+            getPosition(rangerBase)
         )
     );
 }
 
 void UnitManager::createMelee(Entity& meleeBase, unordered_map<int, EntityAction>& actions) {
-    uint baseSize = state->entityProperties[EntityType::MELEE_BASE].size;
+    if (state->myResources < state->meleeCost) {
+        actions[meleeBase.id] = EntityAction();
+        return;
+    }
 
+    state->myResources -= state->meleeCost;
     actions[meleeBase.id] = EntityAction(
         {},  // move
         BuildAction(
             EntityType::MELEE_UNIT,
-            Vec2Int(meleeBase.position.x + baseSize, meleeBase.position.y)
+            getPosition(meleeBase)
         )
     );
+}
+
+Vec2Int UnitManager::getPosition(Entity& base) {
+    uint baseSize = state->entityProperties[base.entityType].size;
+    Vec2Int pos(base.position.x - 1, base.position.y - 1);
+    auto borders = getBorder(pos, baseSize + 2);
+    random_shuffle(borders.begin(), borders.end());
+    for (auto vec: borders) {
+        if (isOutOfMap(vec, state->mapSize) || state->gameMap[vec.x][vec.y] != -1 ||
+            vec == Vec2Int(base.position.x - 1, base.position.y - 1) ||
+            vec == Vec2Int(base.position.x - 1, base.position.y + baseSize) ||
+            vec == Vec2Int(base.position.x + baseSize, base.position.y - 1) ||
+            vec == Vec2Int(base.position.x + baseSize, base.position.y + baseSize)) {
+                continue;
+        }
+        return vec;
+    }
+
+    return Vec2Int(base.position.x + baseSize, base.position.y);
 }

@@ -42,13 +42,14 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         }
     }
 
-    if (state.curBuilderCount >= 8 && state.currentTick < 200 && state.turretCount < 3) {
-        unitManager->stop(actions, EntityType::MELEE_UNIT);
-        unitManager->stop(actions, EntityType::RANGED_UNIT);
-        unitManager->stop(actions, EntityType::BUILDER_UNIT);
-    }
+    // if (state.curBuilderCount >= 8 && state.currentTick < 200 && state.turretCount < 3) {
+    //     unitManager->stop(actions, EntityType::MELEE_UNIT);
+    //     unitManager->stop(actions, EntityType::RANGED_UNIT);
+    //     unitManager->stop(actions, EntityType::BUILDER_UNIT);
+    // }
 
-    if (state.totalPopulation - state.usedPopulation < 6) {
+    if (state.myResources > state.entityProperties[EntityType::HOUSE].initialCost &&
+            state.totalPopulation - state.usedPopulation < 6) {
         buildingManager->createBuilding(actions, EntityType::HOUSE);
     }
 
@@ -62,10 +63,10 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         buildingManager->createBuilding(actions, EntityType::BUILDER_BASE);
     }
 
-    if (state.myResources > state.entityProperties[EntityType::TURRET].initialCost &&
-            state.turretCount < MAX_TURRET) {
-        buildingManager->createBuilding(actions, EntityType::TURRET);
-    }
+    // if (state.myResources > state.entityProperties[EntityType::TURRET].initialCost &&
+    //         state.turretCount < MAX_TURRET) {
+    //     buildingManager->createBuilding(actions, EntityType::TURRET);
+    // }
 
     buildingManager->repairBuildings(actions);
 

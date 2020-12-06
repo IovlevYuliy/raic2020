@@ -14,6 +14,8 @@ public:
     void goToAttack(Entity& myEntity, unordered_map<int, EntityAction>& actions);
     void goToResources(Entity& myEntity, unordered_map<int, EntityAction>& actions);
 
+    Entity* getNearestAlly(Entity& myEntity);
+
     pair<Entity*,Entity*> getTargets(Entity& myEntity);
 
     bool troopIsReady(Entity& myEntity);
