@@ -5,47 +5,59 @@ BuildingManager::BuildingManager(GameState& state_) {
     state = &state_;
 }
 
-optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& actions, EntityType buildingType) {
+optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& actions, EntityType buildingType, optional<Vec2Int> place) {
     if(state->curBuilderCount < 1) {
         return {};
     }
 
     uint size = state->entityProperties[buildingType].size;
-    optional<Vec2Int> foundPlace;
-    if (buildingType == EntityType::TURRET) {
-        foundPlace = findTurretPlace(Vec2Int(0, 0), size);
-    } else {
-        foundPlace = findPlace(Vec2Int(0, 0), size, 4);
+    if (!place) {
+        place = getPlace(buildingType);
     }
 
-    if (foundPlace) {
-        auto builders = getNearestBuilders(foundPlace.value(), repairBuilderCount[buildingType] + 1, size);
+    if (place) {
+        auto builders = getNearestBuilders(place.value(), repairBuilderCount[buildingType] + 1, size);
         for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
+            builders[i].first->busy = true;
             actions[builders[i].first->id] = EntityAction(
-                MoveAction(builders[i].second, true,false),
-                BuildAction(buildingType, foundPlace.value())
-            );
+                MoveAction(builders[i].second, true, false),
+                BuildAction(buildingType, place.value()));
         }
     }
 
     return {};
 }
 
+optional<Vec2Int> BuildingManager::getPlace(EntityType type) {
+    uint size = state->entityProperties[type].size;
+
+    optional<Vec2Int> place;
+    if (type == EntityType::TURRET) {
+        place = findTurretPlace(Vec2Int(0, 0), size);
+    } else {
+        place = findPlace(Vec2Int(0, 0), size, 4);
+    }
+
+    return place;
+}
+
 void BuildingManager::repairBuildings(unordered_map<int, EntityAction>& actions) {
     vector<Entity> buildingsForRepair;
     for (auto& entry : state->myBuildings) {
-        if (isRepairingBuilding(entry) &&
+        if (!entry.active || isRepairingBuilding(entry) &&
                 entry.health < state->entityProperties[entry.entityType].maxHealth) {
             buildingsForRepair.push_back(entry);
         }
     }
 
     for (auto& entry : buildingsForRepair) {
-        int diffHp = state->entityProperties[entry.entityType].maxHealth - entry.health;
-        int builderCount = min((diffHp + 4) / 5, repairBuilderCount[entry.entityType] + 1);
+        // int diffHp = state->entityProperties[entry.entityType].maxHealth - entry.health;
+        int builderCount = entry.active ? repairBuilderCount[entry.entityType] :
+            repairBuilderCount[entry.entityType] + 2;
         auto builders = getNearestBuilders(entry.position, builderCount,
             state->entityProperties[entry.entityType].size);
         for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
+            builders[i].first->busy = true;
             actions[builders[i].first->id] = EntityAction(
                 MoveAction(builders[i].second, true, false),
                 {},  // build
@@ -58,6 +70,9 @@ void BuildingManager::repairBuildings(unordered_map<int, EntityAction>& actions)
 vector<pair<Entity*, Vec2Int>> BuildingManager::getNearestBuilders(Vec2Int pos, uint count, int size) {
     vector<pair<int, int>> q;
     for (uint i = 0; i < static_cast<uint>(state->myBuilders.size()); ++i) {
+        if (state->myBuilders[i].busy) {
+            continue;
+        }
         uint sqrDist = pos.sqrDist(state->myBuilders[i].position);
         q.push_back(make_pair(sqrDist, i));
     }
@@ -199,16 +214,16 @@ optional<Vec2Int> BuildingManager::findTurretPlace(Vec2Int start, uint size) {
         q.pop();
 
         bool ok = isFree(v, size);
-        if (ok && v.x > 5 && v.y > 5) {
-            int regDang = state->getRegionInfluence(v, 5);
-            if (regDang >= -2 && regDang <= 4) {
+        if (ok && v.x > 10 && v.y > 10) {
+            int regDang = state->getRegionInfluence(v, 3);
+            if (regDang >= -2 && regDang <= 14) {
                 return v;
             }
         }
 
         for (uint i = 0; i < 4; ++i) {
             Vec2Int to(v.x + dx[i], v.y + dy[i]);
-            if (isOutOfMap(to, mapSize) || visited.count(to)) {
+            if (isOutOfMap(to, mapSize) || visited.count(to) || state->infMap[to.x][to.y] < 0 || v.x > 50 || v.y > 50) {
                 continue;
             }
             q.push(to);

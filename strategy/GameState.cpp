@@ -70,6 +70,7 @@ void GameState::splitEntities(const PlayerView& playerView) {
 
             if (isBuilder(entry)) {
                 myBuilders.push_back(entry);
+                myBuilders.back().busy = false;
             } else {
                 mySoldiers.push_back(entry);
             }

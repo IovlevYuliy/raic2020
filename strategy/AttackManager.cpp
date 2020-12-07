@@ -150,12 +150,13 @@ void AttackManager::goToResources(Entity& myEntity, unordered_map<int, EntityAct
                 continue;
             }
 
-            if (state->gameMap[to.x][to.y] == EntityType::RESOURCE) {
+            if (state->gameMap[to.x][to.y] == EntityType::RESOURCE && state->infMap[v.x][v.y] >= 0) {
                 visited[to] = v;
                 while (visited[to] != myEntity.position) {
                     to = visited[to];
                 }
                 if (state->gameMap[to.x][to.y] == EntityType::RESOURCE) {
+                    state->myResources++;
                     actions[myEntity.id] = EntityAction(
                         {},
                         AttackAction(

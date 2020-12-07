@@ -19,7 +19,7 @@ public:
     BuildingManager();
     BuildingManager(GameState& state_);
 
-    optional<int> createBuilding(unordered_map<int, EntityAction>& actions, EntityType unitType);
+    optional<int> createBuilding(unordered_map<int, EntityAction>& actions, EntityType unitType, optional<Vec2Int> place);
 
     void repairBuildings(unordered_map<int, EntityAction>& actions);
 
@@ -31,6 +31,7 @@ public:
     pair<Vec2Int, Entity> getNearestBuilder(Entity& destEntity);
     optional<Vec2Int> findPlace(Vec2Int start, uint size, uint divider = 1);
     optional<Vec2Int> findTurretPlace(Vec2Int start, uint size);
+    optional<Vec2Int> getPlace(EntityType type);
 };
 
 #endif

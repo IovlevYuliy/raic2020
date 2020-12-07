@@ -7,6 +7,7 @@
 #include "UnitManager.hpp"
 #include "AttackManager.hpp"
 #include "GameState.hpp"
+#include "Task.hpp"
 
 class MyStrategy {
 public:
@@ -16,11 +17,17 @@ public:
     shared_ptr<BuildingManager> buildingManager;
     shared_ptr<AttackManager> attackManager;
 
+    vector<Task> tasks;
+
     float totalGameTime = 0;
 
     MyStrategy();
 
     Action getAction(const PlayerView& playerView, DebugInterface* debugInterface);
+
+    void createUnits(unordered_map<int, EntityAction>& actions);
+    void executeTasks(unordered_map<int, EntityAction>& actions);
+    void finishTasks();
 
     void getSplittedEntities(const PlayerView& playerView, EntityType type = EntityType::ALL);
 
