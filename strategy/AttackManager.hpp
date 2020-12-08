@@ -16,6 +16,8 @@ public:
 
     Entity* getNearestAlly(Entity& myEntity);
 
+    optional<Vec2Int> getStep(Entity& myEntity, Vec2Int& dest);
+
     pair<Entity*,Entity*> getTargets(Entity& myEntity);
 
     bool troopIsReady(Entity& myEntity);

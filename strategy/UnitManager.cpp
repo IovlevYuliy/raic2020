@@ -41,8 +41,8 @@ void UnitManager::stop(unordered_map<int, EntityAction>& actions, EntityType uni
 }
 
 void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAction>& actions, bool force) {
-    if ((state->currentTick > 300 &&
-            state->curBuilderCount >= state->totalPopulation * MAX_BUILDERS_PERCENTAGE) ||
+    if ((state->currentTick > 500 && state->curBuilderCount >= 25) ||
+        (state->currentTick >= 100 && state->curRangerCount < 10) ||
             state->curBuilderCount >= MAX_BUILDERS ||
             state->remainingResources <= RESOURCE_THRESHOLD ||
             state->distToBase <= DEFENSE_THRESHOLD ||
@@ -96,19 +96,19 @@ void UnitManager::createMelee(Entity& meleeBase, unordered_map<int, EntityAction
 
 Vec2Int UnitManager::getPosition(Entity& base) {
     uint baseSize = state->entityProperties[base.entityType].size;
-    Vec2Int pos(base.position.x - 1, base.position.y - 1);
-    auto borders = getBorder(pos, baseSize + 2);
-    random_shuffle(borders.begin(), borders.end());
-    for (auto vec: borders) {
-        if (isOutOfMap(vec, state->mapSize) || state->gameMap[vec.x][vec.y] != -1 ||
-            vec == Vec2Int(base.position.x - 1, base.position.y - 1) ||
-            vec == Vec2Int(base.position.x - 1, base.position.y + baseSize) ||
-            vec == Vec2Int(base.position.x + baseSize, base.position.y - 1) ||
-            vec == Vec2Int(base.position.x + baseSize, base.position.y + baseSize)) {
-                continue;
-        }
-        return vec;
-    }
+    // Vec2Int pos(base.position.x - 1, base.position.y - 1);
+    // auto borders = getBorder(pos, baseSize + 2);
+    // random_shuffle(borders.begin(), borders.end());
+    // for (auto vec: borders) {
+    //     if (isOutOfMap(vec, state->mapSize) || state->gameMap[vec.x][vec.y] != -1 ||
+    //         vec == Vec2Int(base.position.x - 1, base.position.y - 1) ||
+    //         vec == Vec2Int(base.position.x - 1, base.position.y + baseSize) ||
+    //         vec == Vec2Int(base.position.x + baseSize, base.position.y - 1) ||
+    //         vec == Vec2Int(base.position.x + baseSize, base.position.y + baseSize)) {
+    //             continue;
+    //     }
+    //     return vec;
+    // }
 
     return Vec2Int(base.position.x + baseSize, base.position.y);
 }

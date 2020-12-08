@@ -59,7 +59,6 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         }
     }
 
-    cerr << "res " << state.myResources << endl;
     createUnits(actions);
 
     // if (state.curBuilderCount >= 8 && state.currentTick < 200 && state.turretCount < 3) {
@@ -81,16 +80,16 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
 
 void MyStrategy::createUnits(unordered_map<int, EntityAction>& actions) {
     unitManager->createUnits(actions, EntityType::BUILDER_UNIT);
-    if (state.rangedBaseCount && state.meleeBaseCount) {
-        if (state.rangerCost > 3 * state.meleeCost) {
-            unitManager->stop(actions, EntityType::RANGED_UNIT);
-            unitManager->createUnits(actions, EntityType::MELEE_UNIT);
-        } else {
-            unitManager->stop(actions, EntityType::MELEE_UNIT);
-            unitManager->createUnits(actions, EntityType::RANGED_UNIT);
-        }
-    } else {
+
+    if (state.rangedBaseCount) {
         unitManager->createUnits(actions, EntityType::RANGED_UNIT);
+        // if (state.rangerCost > 3 * state.meleeCost) {
+        //     unitManager->stop(actions, EntityType::RANGED_UNIT);
+        //     unitManager->createUnits(actions, EntityType::MELEE_UNIT);
+        // } else {
+        //     unitManager->stop(actions, EntityType::MELEE_UNIT);
+        // }
+    } else {
         unitManager->createUnits(actions, EntityType::MELEE_UNIT);
     }
 }

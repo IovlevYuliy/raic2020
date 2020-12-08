@@ -1,26 +1,26 @@
 #ifndef _COMMON_HPP_
 #define _COMMON_HPP_
 
-#include <optional>
-#include <iostream>
 #include <algorithm>
-#include <unordered_set>
-#include <unordered_map>
-#include <functional>
-#include <queue>
-#include <vector>
-#include <string>
 #include <ctime>
+#include <functional>
+#include <iostream>
+#include <optional>
+#include <queue>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include "model/Model.hpp"
 
 using namespace std;
 
-const float MAX_BUILDERS_PERCENTAGE = 0.5;
+const float MAX_BUILDERS_PERCENTAGE = 0.4;
 const int MAX_TURRET = 5;
 const int MAX_RANGED_BASE = 1;
 const int MAX_BUILDER_BASE = 1;
-const int MAX_BUILDERS = 45;
+const int MAX_BUILDERS = 40;
 const int BUILDER_DELAY_TICKS = 10;
 const int DEFENSE_THRESHOLD = 20;
 const int RESOURCE_THRESHOLD = 100;
@@ -29,7 +29,7 @@ const int dx[4] = {0, 0, 1, -1};
 const int dy[4] = {1, -1, 0, 0};
 
 inline bool isOutOfMap(Vec2Int& pos, uint mapSize) {
-    return pos.x < 0 || pos.x >= mapSize || pos.y < 0 || pos.y > mapSize;
+    return pos.x < 0 || pos.x >= mapSize || pos.y < 0 || pos.y >= mapSize;
 }
 
 inline bool isBase(EntityType type) {
@@ -70,6 +70,10 @@ inline bool isMelee(const Entity& entry) {
 
 inline bool isUnit(const Entity& entry) {
     return isBuilder(entry) || isRanger(entry) || isMelee(entry);
+}
+
+inline bool isUnit(const EntityType type) {
+    return type == EntityType::BUILDER_UNIT || type == EntityType::RANGED_UNIT || type == EntityType::MELEE_UNIT;
 }
 
 inline vector<Vec2Int> getBorder(Vec2Int pos, int size) {

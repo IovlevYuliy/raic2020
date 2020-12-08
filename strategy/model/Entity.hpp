@@ -17,6 +17,7 @@ public:
     int health;
     bool active;
     uint targets;
+    int distToBase;
     bool busy;
     Entity();
     Entity(int id, std::shared_ptr<int> playerId, EntityType entityType, Vec2Int position, int health, bool active);

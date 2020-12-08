@@ -84,6 +84,7 @@ void GameState::splitEntities(const PlayerView& playerView) {
                 enemyBuilders.push_back(entry);
             } else {
                 enemySoldiers.push_back(entry);
+                enemySoldiers.back().distToBase = mapSize * 2;
             }
         }
         remainingResources += (entry.entityType == EntityType::RESOURCE);
@@ -139,9 +140,10 @@ void GameState::calcTargets() {
         }
     }
     distToBase = 1e9;
-    for (auto& entry: myBases) {
+    for (auto& entry: myBuildings) {
         for (auto& enemy: enemySoldiers) {
             auto res = getDistance(enemy, entry, entityProperties);
+            enemy.distToBase = min(enemy.distToBase, static_cast<int>(res.first));
             distToBase = min(res.first, distToBase);
         }
     }
@@ -169,6 +171,7 @@ void GameState::fillInfluence(Entity& entity) {
         int sz = entityProperties[entity.entityType].size;
         int range = entityProperties[entity.entityType].attack->attackRange;
         int sign = *entity.playerId == myId ? 1 : -1;
+        int add = (entity.health + 4) / 5;
         Vec2Int pos;
         for (int i = entity.position.x - range; i <= entity.position.x + sz + range; ++i) {
             for (int j = entity.position.y - range; j <= entity.position.y + sz + range; ++j) {
@@ -180,7 +183,7 @@ void GameState::fillInfluence(Entity& entity) {
                 int dist = min(abs(i - entity.position.x), abs(i - entity.position.x - sz + 1)) +
                            min(abs(j - entity.position.y), abs(j - entity.position.y - sz + 1));
                 if (dist <= range) {
-                    infMap[pos.x][pos.y] += sign * (range + 1 - dist);
+                    infMap[pos.x][pos.y] += sign * add;
                 }
             }
         }
@@ -210,13 +213,14 @@ void GameState::fillInfluence(Entity& entity) {
 
     int range = entityProperties[entity.entityType].attack->attackRange + 1;
     int sign = *entity.playerId == myId ? 1 : -1;
+    int add = (entity.health + 4) / 5;
     Vec2Int pos;
     for (int i = -range; i <= range; ++i) {
         for (int j = -(range - abs(i)); j <= (range - abs(i)); ++j) {
             pos.x = entity.position.x + i;
             pos.y = entity.position.y + j;
             if (!isOutOfMap(pos, mapSize)) {
-                infMap[pos.x][pos.y] += sign * (range + 1 - abs(i) - abs(j));
+                infMap[pos.x][pos.y] += sign * add;
             }
         }
     }

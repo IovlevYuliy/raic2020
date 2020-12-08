@@ -172,7 +172,7 @@ bool BuildingManager::isFree(Vec2Int& pos, uint size) {
 }
 
 bool BuildingManager::isForbidden(Vec2Int& pos) {
-    uint& mapSize = state->mapSize;
+    uint mapSize = state->mapSize;
     for (uint i = 0; i < 4; ++i) {
         uint nx = pos.x + dx[i];
         uint ny = pos.y + dy[i];
