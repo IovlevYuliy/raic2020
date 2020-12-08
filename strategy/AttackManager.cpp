@@ -139,6 +139,9 @@ pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
 
     for (auto& enemy : state->enemyBuildings) {
         if (enemy.health <= 0) continue;
+        if (isTurret(enemy)) {
+            continue;
+        }
 
         auto dist = getDistance(myEntity, enemy, state->entityProperties);
 
