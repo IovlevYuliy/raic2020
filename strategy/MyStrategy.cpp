@@ -43,6 +43,11 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         tasks.push_back(Task(buildingManager->getPlace(EntityType::RANGED_BASE), EntityType::RANGED_BASE));
     }
 
+    if (state.currentTick > 200 && !isWallCreated && state.myResources >= state.entityProperties[EntityType::WALL].initialCost) {
+        state.myResources -= state.entityProperties[EntityType::WALL].initialCost;
+        tasks.push_back(Task(buildingManager->getPlace(EntityType::WALL), EntityType::WALL));
+    }
+
     executeTasks(actions);
 
     for (auto& entry : state.mySoldiers) {
@@ -101,6 +106,9 @@ void MyStrategy::finishTasks() {
         }
         if (task.pos && state.gameMap[task.pos.value().x][task.pos.value().y] == task.type) {
             task.finished = true;
+            if (task.type == EntityType::WALL) {
+                isWallCreated = true;
+            }
             continue;
         }
         task.ttl--;

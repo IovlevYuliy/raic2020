@@ -20,6 +20,7 @@ public:
     vector<Task> tasks;
 
     float totalGameTime = 0;
+    bool isWallCreated = false;
 
     MyStrategy();
 

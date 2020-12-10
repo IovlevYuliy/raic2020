@@ -43,7 +43,8 @@ inline bool isBuilding(EntityType type) {
         type == EntityType::MELEE_BASE ||
         type == EntityType::RANGED_BASE ||
         type == EntityType::HOUSE ||
-        type == EntityType::TURRET;
+        type == EntityType::TURRET ||
+        type == EntityType::WALL;
 }
 
 inline bool isTurret(const Entity& entry) {
