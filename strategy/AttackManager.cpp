@@ -101,10 +101,10 @@ pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
             targetInRange = &enemy;
         }
 
-        // if (dist < minDist) {
-        //     minDist = dist;
-        //     nearestTarget = &enemy;
-        // }
+        if (dist < minDist) {
+            minDist = dist;
+            nearestTarget = &enemy;
+        }
 
         if (enemy.distToBase < minDistToBase) {
             // cerr << enemy.distToBase << endl;
@@ -127,10 +127,10 @@ pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
             targetInRange = &enemy;
         }
 
-        // if (dist < minDist) {
-        //     minDist = dist;
-        //     nearestTarget = &enemy;
-        // }
+        if (dist < minDist) {
+            minDist = dist;
+            nearestTarget = &enemy;
+        }
     }
 
     if (targetInRange) {
@@ -156,9 +156,9 @@ pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
         }
     }
 
-    if (nearestToBase && minDistToBase < DEFENSE_THRESHOLD && nearestToBase->position.dist(myEntity.position) <= 2 * DEFENSE_THRESHOLD) {
-        return make_pair(nullptr, nearestToBase);
-    }
+    // if (nearestToBase && minDistToBase < DEFENSE_THRESHOLD && nearestToBase->position.dist(myEntity.position) <= 2 * DEFENSE_THRESHOLD) {
+    //     return make_pair(nullptr, nearestToBase);
+    // }
 
     return make_pair(targetInRange, nearestTarget);
 }

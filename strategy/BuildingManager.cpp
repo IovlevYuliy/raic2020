@@ -34,6 +34,8 @@ optional<Vec2Int> BuildingManager::getPlace(EntityType type) {
     optional<Vec2Int> place;
     if (type == EntityType::TURRET) {
         place = findTurretPlace(Vec2Int(0, 0), size);
+    } else if (type == EntityType::WALL) {
+        place = findPlace(Vec2Int(15, 15), size, 1);
     } else {
         place = findPlace(Vec2Int(0, 0), size, 4);
     }
