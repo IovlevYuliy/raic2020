@@ -1,8 +1,7 @@
 #include "BuildingManager.hpp"
 
-BuildingManager::BuildingManager() {}
-BuildingManager::BuildingManager(GameState& state_) {
-    state = &state_;
+BuildingManager::BuildingManager() {
+    state = GameState::getState();
 }
 
 optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& actions, EntityType buildingType, optional<Vec2Int> place) {
@@ -16,7 +15,7 @@ optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& 
     }
 
     if (place) {
-        auto builders = getNearestBuilders(place.value(), repairBuilderCount[buildingType] + 1, size);
+        auto builders = getNearestBuilders(place.value(), repairBuilderCount[buildingType] + 2, size);
         for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
             builders[i].first->busy = true;
             actions[builders[i].first->id] = EntityAction(
@@ -29,13 +28,17 @@ optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& 
 }
 
 optional<Vec2Int> BuildingManager::getPlace(EntityType type) {
+    if (state->curBuilderCount < 1) {
+        return {};
+    }
+
     uint size = state->entityProperties[type].size;
 
     optional<Vec2Int> place;
     if (type == EntityType::TURRET) {
-        place = findTurretPlace(Vec2Int(0, 0), size);
+        place = findTurretPlace(state->myBuilders[rand() % state->myBuilders.size()].position, size);
     } else if (type == EntityType::WALL) {
-        place = findPlace(Vec2Int(15, 15), size, 1);
+        place = findPlace(Vec2Int(rand() % 15, rand() % 15), size, 1);
     } else {
         place = findPlace(Vec2Int(0, 0), size, 4);
     }
@@ -164,7 +167,7 @@ bool BuildingManager::isFree(Vec2Int& pos, uint size) {
 
     for (uint i = pos.x; i < pos.x + size; ++i) {
         for (uint j = pos.y; j < pos.y + size; ++j) {
-            if (i >= mapSize || j >= mapSize || state->gameMap[i][j] != -1 || state->infMap[i][j] < 0) {
+            if (i >= mapSize || j >= mapSize || state->gameMap[i][j] != -1 || state->enemyAttackMap.getValue(i, j) < 0) {
                 return false;
             }
         }
@@ -215,17 +218,17 @@ optional<Vec2Int> BuildingManager::findTurretPlace(Vec2Int start, uint size) {
         Vec2Int v = q.front();
         q.pop();
 
-        bool ok = isFree(v, size);
-        if (ok && v.x > 10 && v.y > 10) {
-            int regDang = state->getRegionInfluence(v, 3);
-            if (regDang >= -2 && regDang <= 14) {
+        bool ok = isFree(v, size) && checkNeighbors(v, size);
+        if (ok && (v.x > 20 || v.y > 20)) {
+            // int inf = state->influenceMap.getRegionInfluence(v, 5);
+            // if (inf > -2 && inf < 10) {
                 return v;
-            }
+            // }
         }
 
         for (uint i = 0; i < 4; ++i) {
             Vec2Int to(v.x + dx[i], v.y + dy[i]);
-            if (isOutOfMap(to, mapSize) || visited.count(to) || state->infMap[to.x][to.y] < 0 || v.x > 50 || v.y > 50) {
+            if (isOutOfMap(to, mapSize) || visited.count(to) || state->enemyAttackMap.getValue(to) < 0 || v.x > 50 || v.y > 50) {
                 continue;
             }
             q.push(to);

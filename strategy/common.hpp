@@ -2,11 +2,14 @@
 #define _COMMON_HPP_
 
 #include <algorithm>
+#include <cmath>
 #include <ctime>
 #include <functional>
+#include <iomanip>
 #include <iostream>
 #include <optional>
 #include <queue>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -17,10 +20,10 @@
 using namespace std;
 
 const float MAX_BUILDERS_PERCENTAGE = 0.4;
-const int MAX_TURRET = 5;
+const int MAX_TURRET = 30;
 const int MAX_RANGED_BASE = 1;
 const int MAX_BUILDER_BASE = 1;
-const int MAX_BUILDERS = 40;
+const int MAX_BUILDERS = 45;
 const int BUILDER_DELAY_TICKS = 10;
 const int DEFENSE_THRESHOLD = 20;
 const int RESOURCE_THRESHOLD = 100;
@@ -54,7 +57,8 @@ inline bool isTurret(const Entity& entry) {
 inline bool isRepairingBuilding(const Entity& entry) {
     return entry.entityType == EntityType::BUILDER_BASE ||
         entry.entityType == EntityType::HOUSE ||
-        entry.entityType == EntityType::RANGED_BASE;
+        entry.entityType == EntityType::RANGED_BASE ||
+        entry.entityType == EntityType::TURRET;
 }
 
 inline bool isBuilder(const Entity& entry) {

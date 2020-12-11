@@ -11,13 +11,12 @@ public:
         { EntityType::BUILDER_BASE, 3 },
         { EntityType::MELEE_BASE, 3 },
         { EntityType::RANGED_BASE, 3 },
-        { EntityType::HOUSE, 2 },
-        { EntityType::TURRET, 2 },
+        { EntityType::HOUSE, 1 },
+        { EntityType::TURRET, 1 },
         { EntityType::WALL, 1 }
     };
 
     BuildingManager();
-    BuildingManager(GameState& state_);
 
     optional<int> createBuilding(unordered_map<int, EntityAction>& actions, EntityType unitType, optional<Vec2Int> place);
 

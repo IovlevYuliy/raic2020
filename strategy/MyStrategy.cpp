@@ -2,63 +2,69 @@
 #include <exception>
 
 MyStrategy::MyStrategy() {
-    unitManager = shared_ptr<UnitManager>(new UnitManager(state));
-    buildingManager = shared_ptr<BuildingManager>(new BuildingManager(state));
-    attackManager = shared_ptr<AttackManager>(new AttackManager(state));
+    state = GameState::getState();
+
+    unitManager = shared_ptr<UnitManager>(new UnitManager());
+    buildingManager = shared_ptr<BuildingManager>(new BuildingManager());
+    attackManager = shared_ptr<AttackManager>(new AttackManager());
 }
 
 Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debugInterface) {
     const clock_t total_begin_time = clock();
-    state.parsePlayerView(playerView);
+    state->parsePlayerView(playerView);
 
     unordered_map<int, EntityAction> actions;
     // if (debugInterface) {
-    //     state.drawInfMap(debugInterface);
+    //     state->influenceMap.draw(debugInterface);
     // }
 
     finishTasks();
     buildingManager->repairBuildings(actions);
 
-    if (state.myResources >= state.entityProperties[EntityType::HOUSE].initialCost &&
-            state.totalPopulation - state.usedPopulation < 6) {
-        state.myResources -= state.entityProperties[EntityType::HOUSE].initialCost;
+    if (state->myResources >= state->entityProperties[EntityType::HOUSE].initialCost &&
+            state->totalPopulation - state->usedPopulation < 6) {
+        state->myResources -= state->entityProperties[EntityType::HOUSE].initialCost;
         tasks.push_back(Task(buildingManager->getPlace(EntityType::HOUSE), EntityType::HOUSE));
     }
 
-    // if (state.myResources >= state.entityProperties[EntityType::TURRET].initialCost &&
-    //         state.turretCount < MAX_TURRET) {
-    //     state.myResources -= state.entityProperties[EntityType::TURRET].initialCost;
-    //     tasks.push_back(Task(buildingManager->getPlace(EntityType::TURRET), EntityType::TURRET));
-    // }
+    if (state->currentTick % 5 == 0 && state->distToBase >= DEFENSE_THRESHOLD && state->myResources >= state->entityProperties[EntityType::TURRET].initialCost &&
+            state->turretCount < MAX_TURRET) {
+        auto foundPlace = buildingManager->getPlace(EntityType::TURRET);
+        if (foundPlace) {
+            // cerr << "create turret " << foundPlace.value().x << ' ' <<  foundPlace.value().y << endl;
+            state->myResources -= state->entityProperties[EntityType::TURRET].initialCost;
+            tasks.push_back(Task(foundPlace, EntityType::TURRET));
+        }
+    }
 
-    if (state.myResources >= state.entityProperties[EntityType::BUILDER_BASE].initialCost &&
-            state.builderBaseCount < MAX_BUILDER_BASE) {
-        state.myResources -= state.entityProperties[EntityType::BUILDER_BASE].initialCost;
+    if (state->myResources >= state->entityProperties[EntityType::BUILDER_BASE].initialCost &&
+            state->builderBaseCount < MAX_BUILDER_BASE) {
+        state->myResources -= state->entityProperties[EntityType::BUILDER_BASE].initialCost;
         tasks.push_back(Task(buildingManager->getPlace(EntityType::BUILDER_BASE), EntityType::BUILDER_BASE));
     }
 
-    if (state.myResources >= state.entityProperties[EntityType::RANGED_BASE].initialCost &&
-            state.rangedBaseCount < MAX_RANGED_BASE) {
-        state.myResources -= state.entityProperties[EntityType::RANGED_BASE].initialCost;
+    if (state->myResources >= state->entityProperties[EntityType::RANGED_BASE].initialCost &&
+            state->rangedBaseCount < MAX_RANGED_BASE) {
+        state->myResources -= state->entityProperties[EntityType::RANGED_BASE].initialCost;
         tasks.push_back(Task(buildingManager->getPlace(EntityType::RANGED_BASE), EntityType::RANGED_BASE));
     }
 
-    if (state.currentTick > 200 && !isWallCreated && state.myResources >= state.entityProperties[EntityType::WALL].initialCost) {
-        state.myResources -= state.entityProperties[EntityType::WALL].initialCost;
-        tasks.push_back(Task(buildingManager->getPlace(EntityType::WALL), EntityType::WALL));
-    }
+    // if (state->currentTick > 200 && !isWallCreated && state->myResources >= state->entityProperties[EntityType::WALL].initialCost) {
+    //     state->myResources -= state->entityProperties[EntityType::WALL].initialCost;
+    //     tasks.push_back(Task(buildingManager->getPlace(EntityType::WALL), EntityType::WALL));
+    // }
 
     executeTasks(actions);
 
-    for (auto& entry : state.mySoldiers) {
+    for (auto& entry : state->mySoldiers) {
         attackManager->goToAttack(entry, actions);
     }
-    for (auto& entry : state.myBuilders) {
+    for (auto& entry : state->myBuilders) {
         if (!entry.busy) {
             attackManager->goToAttack(entry, actions);
         }
     }
-    for (auto& entry : state.myBuildings) {
+    for (auto& entry : state->myBuildings) {
         if (isTurret(entry)) {
             attackManager->goToAttack(entry, actions);
         }
@@ -66,14 +72,14 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
 
     createUnits(actions);
 
-    // if (state.curBuilderCount >= 8 && state.currentTick < 200 && state.turretCount < 3) {
+    // if (state->curBuilderCount >= 8 && state->currentTick < 200 && state->turretCount < 3) {
     //     unitManager->stop(actions, EntityType::MELEE_UNIT);
     //     unitManager->stop(actions, EntityType::RANGED_UNIT);
     //     unitManager->stop(actions, EntityType::BUILDER_UNIT);
     // }
 
-    // if (state.myResources > state.entityProperties[EntityType::TURRET].initialCost &&
-    //         state.turretCount < MAX_TURRET) {
+    // if (state->myResources > state->entityProperties[EntityType::TURRET].initialCost &&
+    //         state->turretCount < MAX_TURRET) {
     //     buildingManager->createBuilding(actions, EntityType::TURRET);
     // }
 
@@ -86,9 +92,9 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
 void MyStrategy::createUnits(unordered_map<int, EntityAction>& actions) {
     unitManager->createUnits(actions, EntityType::BUILDER_UNIT);
 
-    if (state.rangedBaseCount) {
+    if (state->rangedBaseCount) {
         unitManager->createUnits(actions, EntityType::RANGED_UNIT);
-        // if (state.rangerCost > 3 * state.meleeCost) {
+        // if (state->rangerCost > 3 * state->meleeCost) {
         //     unitManager->stop(actions, EntityType::RANGED_UNIT);
         //     unitManager->createUnits(actions, EntityType::MELEE_UNIT);
         // } else {
@@ -104,17 +110,21 @@ void MyStrategy::finishTasks() {
         if (task.finished || task.ttl <= 0) {
             continue;
         }
-        if (task.pos && state.gameMap[task.pos.value().x][task.pos.value().y] == task.type) {
+
+        if (task.pos && state->gameMap[task.pos.value().x][task.pos.value().y] == task.type) {
             task.finished = true;
-            if (task.type == EntityType::WALL) {
-                isWallCreated = true;
-            }
             continue;
+        }
+        if (task.pos) {
+            state->fillGameMap(task.pos.value(), task.type);
         }
         task.ttl--;
 
-        state.totalPopulation += state.entityProperties[task.type].populationProvide;
-        state.myResources -= state.entityProperties[task.type].initialCost;
+        state->totalPopulation += state->entityProperties[task.type].populationProvide;
+        state->myResources -= state->entityProperties[task.type].initialCost;
+        if (task.type == EntityType::TURRET) {
+            state->turretCount++;
+        }
     }
 }
 

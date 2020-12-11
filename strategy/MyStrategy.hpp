@@ -11,7 +11,7 @@
 
 class MyStrategy {
 public:
-    GameState state;
+    GameState* state;
 
     shared_ptr<UnitManager> unitManager;
     shared_ptr<BuildingManager> buildingManager;

@@ -23,7 +23,7 @@ public:
         while (true) {
             auto message = ServerMessage::readFrom(*inputStream);
             if (auto getActionMessage = std::dynamic_pointer_cast<ServerMessage::GetAction>(message)) {
-                ClientMessage::ActionMessage(myStrategy.getAction(getActionMessage->playerView, getActionMessage->debugAvailable ? &debugInterface : nullptr)).writeTo(*outputStream);
+                ClientMessage::ActionMessage(myStrategy.getAction(getActionMessage->playerView, port == 31001 ? &debugInterface : nullptr)).writeTo(*outputStream);
                 outputStream->flush();
             } else if (auto finishMessage = std::dynamic_pointer_cast<ServerMessage::Finish>(message)) {
                 break;

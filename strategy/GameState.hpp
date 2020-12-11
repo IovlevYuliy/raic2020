@@ -1,10 +1,13 @@
 #ifndef _GAME_STATE_HPP_
 #define _GAME_STATE_HPP_
 
-#include "DebugInterface.hpp"
+#include "InfluenceMap.hpp"
 #include "common.hpp"
 
 class GameState {
+private:
+    static GameState* state_;
+    GameState();
 public:
     unordered_map<EntityType, EntityProperties> entityProperties;
 
@@ -18,7 +21,10 @@ public:
     vector<Entity> enemyBuildings;
 
     vector<vector<char>> gameMap;
-    vector<vector<int>> infMap;
+    InfluenceMap enemyAttackMap;
+    InfluenceMap enemyInfluence;
+    InfluenceMap myInfluence;
+    InfluenceMap influenceMap;
 
     uint mapSize;
 
@@ -45,15 +51,15 @@ public:
 
     int myId;
 
-    GameState();
+    static GameState* getState();
 
     void parsePlayerView(const PlayerView& playerView);
 
     void restoreGameMap(const PlayerView& playerView);
 
-    void createInfluenceMap();
-    int getRegionInfluence(Vec2Int pos, int range);
-    void fillInfluence(Entity& entity);
+    void createInfluenceMaps();
+
+    void fillGameMap(const Vec2Int& pos, EntityType type);
 
     void splitEntities(const PlayerView& playerView);
 
@@ -61,7 +67,9 @@ public:
 
     void calcPopulationStats();
 
-    void drawInfMap(DebugInterface* debugInterface);
+    int calcBuilders(Vec2Int& pos, int radius);
+
+    optional<Vec2Int> getStep(Entity& myEntity, Vec2Int& dest);
 };
 
 #endif

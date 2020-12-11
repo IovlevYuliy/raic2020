@@ -9,7 +9,6 @@ public:
     GameState* state;
 
     AttackManager();
-    AttackManager(GameState& state_);
 
     void goToAttack(Entity& myEntity, unordered_map<int, EntityAction>& actions);
     void goToResources(Entity& myEntity, unordered_map<int, EntityAction>& actions);

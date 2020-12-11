@@ -9,7 +9,6 @@ public:
     GameState* state;
 
     UnitManager();
-    UnitManager(GameState& state_);
 
     void createUnits(unordered_map<int, EntityAction>& actions, EntityType unitType,
         bool force = false);

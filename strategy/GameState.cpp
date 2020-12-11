@@ -2,6 +2,16 @@
 
 GameState::GameState() {}
 
+GameState* GameState::state_ = nullptr;
+
+GameState* GameState::getState() {
+    if (state_ == nullptr) {
+        state_ = new GameState();
+    }
+
+    return state_;
+}
+
 void GameState::parsePlayerView(const PlayerView& playerView) {
     entityProperties = playerView.entityProperties;
     currentTick = playerView.currentTick;
@@ -23,7 +33,7 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
         return x.targets < y.targets;
     });
 
-    createInfluenceMap();
+    createInfluenceMaps();
 }
 
 void GameState::restoreGameMap(const PlayerView& playerView) {
@@ -37,11 +47,15 @@ void GameState::restoreGameMap(const PlayerView& playerView) {
     gameMap.assign(mapSize, vector<char>(mapSize, -1));
 
     for (auto& entry: playerView.entities) {
-        uint size = entityProperties[entry.entityType].size;
-        for (int i = entry.position.x; i < entry.position.x + size; ++i) {
-            for (int j = entry.position.y; j < entry.position.y + size; ++j) {
-                gameMap[i][j] = entry.entityType;
-            }
+        fillGameMap(entry.position, entry.entityType);
+    }
+}
+
+void GameState::fillGameMap(const Vec2Int& pos, EntityType type) {
+    uint size = entityProperties[type].size;
+    for (int i = pos.x; i < pos.x + size; ++i) {
+        for (int j = pos.y; j < pos.y + size; ++j) {
+            gameMap[i][j] = type;
         }
     }
 }
@@ -149,107 +163,126 @@ void GameState::calcTargets() {
     }
 }
 
-void GameState::createInfluenceMap() {
-    infMap.resize(mapSize);
-    infMap.assign(mapSize, vector<int>(mapSize, 0));
+void GameState::createInfluenceMaps() {
+    enemyAttackMap.clear(mapSize);
+    enemyInfluence.clear(mapSize);
+    myInfluence.clear(mapSize);
+
     for (auto& enemy: enemySoldiers) {
-       fillInfluence(enemy);
+       enemyAttackMap.fillInfluence(
+           enemy,
+           entityProperties[enemy.entityType].size, // size
+           entityProperties[enemy.entityType].attack->attackRange + 1, // attack range
+           myId);
+       enemyInfluence.fillInfluence(
+           enemy,
+           entityProperties[enemy.entityType].size,                     // size
+           entityProperties[enemy.entityType].attack->attackRange + 1,  // attack range
+           myId);
     }
+    for (auto& entry : enemyBuildings) {
+        if (isTurret(entry)) {
+            enemyAttackMap.fillInfluence(
+                entry,
+                entityProperties[entry.entityType].size,                 // size
+                entityProperties[entry.entityType].attack->attackRange + 1,  // attack range
+                myId);
+        }
+        enemyInfluence.fillInfluence(
+            entry,
+            entityProperties[entry.entityType].size,  // size
+            5,                                        // building range
+            myId);
+    }
+    for (auto& entry : enemyBuilders) {
+        enemyInfluence.fillInfluence(
+            entry,
+            entityProperties[entry.entityType].size,                     // size
+            entityProperties[entry.entityType].attack->attackRange + 1,  // building range
+            myId);
+    }
+
     for (auto& entry: mySoldiers) {
-       fillInfluence(entry);
+        myInfluence.fillInfluence(
+            entry,
+            entityProperties[entry.entityType].size,                     // size
+            entityProperties[entry.entityType].attack->attackRange + 1,  // attack range
+            myId);
     }
     for (auto& entry: myBuildings) {
-       fillInfluence(entry);
+        if (isTurret(entry)) {
+            myInfluence.fillInfluence(
+                entry,
+                entityProperties[entry.entityType].size,                     // size
+                entityProperties[entry.entityType].attack->attackRange + 1,  // attack range
+                myId);
+        }
+        myInfluence.fillInfluence(
+            entry,
+            entityProperties[entry.entityType].size,                     // size
+            5,  // building range
+            myId);
     }
-    for (auto& entry: enemyBuildings) {
-       fillInfluence(entry);
+    for (auto& entry : myBuilders) {
+        myInfluence.fillInfluence(
+            entry,
+            entityProperties[entry.entityType].size,                     // size
+            entityProperties[entry.entityType].attack->attackRange + 1,  // building range
+            myId);
     }
+
+    influenceMap = InfluenceMap(myInfluence);
+    influenceMap.add(enemyInfluence);
 }
 
-void GameState::fillInfluence(Entity& entity) {
-    if (isTurret(entity)) {
-        int sz = entityProperties[entity.entityType].size;
-        int range = entityProperties[entity.entityType].attack->attackRange;
-        int sign = *entity.playerId == myId ? 1 : -1;
-        int add = (entity.health + 4) / 5;
-        Vec2Int pos;
-        for (int i = entity.position.x - range; i <= entity.position.x + sz + range; ++i) {
-            for (int j = entity.position.y - range; j <= entity.position.y + sz + range; ++j) {
-                pos.x = i;
-                pos.y = j;
-                if (isOutOfMap(pos, mapSize)) {
-                    continue;
-                }
-                int dist = min(abs(i - entity.position.x), abs(i - entity.position.x - sz + 1)) +
-                           min(abs(j - entity.position.y), abs(j - entity.position.y - sz + 1));
-                if (dist <= range) {
-                    infMap[pos.x][pos.y] += sign * add;
-                }
-            }
-        }
-        return;
-    }
-
-    if (isBuilding(entity.entityType)) {
-        int sz = entityProperties[entity.entityType].size;
-        int range = 5;
-        Vec2Int pos;
-        for (int i = entity.position.x - range; i <= entity.position.x + sz + range; ++i) {
-            for (int j = entity.position.y - range; j <= entity.position.y + sz + range; ++j) {
-                pos.x = i;
-                pos.y = j;
-                if (isOutOfMap(pos, mapSize)) {
-                    continue;
-                }
-                int dist = min(abs(i - entity.position.x), abs(i - entity.position.x - sz + 1)) +
-                           min(abs(j - entity.position.y), abs(j - entity.position.y - sz + 1));
-                if (dist <= range) {
-                    infMap[pos.x][pos.y] ++;
-                }
-            }
-        }
-        return;
-    }
-
-    int range = entityProperties[entity.entityType].attack->attackRange + 1;
-    int sign = *entity.playerId == myId ? 1 : -1;
-    int add = (entity.health + 4) / 5;
-    Vec2Int pos;
-    for (int i = -range; i <= range; ++i) {
-        for (int j = -(range - abs(i)); j <= (range - abs(i)); ++j) {
-            pos.x = entity.position.x + i;
-            pos.y = entity.position.y + j;
-            if (!isOutOfMap(pos, mapSize)) {
-                infMap[pos.x][pos.y] += sign * add;
-            }
-        }
-    }
-}
-
-void GameState::drawInfMap(DebugInterface* debugInterface) {
-    for (uint i = 0; i < mapSize; ++i) {
-        for (uint j = 0; j < mapSize; ++j) {
-            string s = to_string(infMap[i][j]);
-            auto dc = DebugCommand::Add(shared_ptr<DebugData>(new DebugData::PlacedText(
-                ColoredVertex(Vec2Float(i + 0.5, j + 0.5), Vec2Float(0, 0), Color(255, 0, 0, 1)), s, 0, 11)
-            ));
-            debugInterface->send(dc);
-        }
-    }
-}
-
-int GameState::getRegionInfluence(Vec2Int pos, int range) {
+int GameState::calcBuilders(Vec2Int& pos, int radius) {
     Vec2Int cur;
-    int sum = 0;
-    for (int i = -range; i <= range; ++i) {
-        for (int j = -(range - abs(i)); j <= (range - abs(i)); ++j) {
+    int count = 0;
+    for (int i = -radius; i <= radius; ++i) {
+        for (int j = -radius; j <= radius; ++j) {
             cur.x = pos.x + i;
             cur.y = pos.y + j;
             if (!isOutOfMap(cur, mapSize)) {
-                sum += infMap[cur.x][cur.y];
+                count += (gameMap[cur.x][cur.y] == EntityType::BUILDER_UNIT);
             }
         }
     }
 
-    return sum;
+    return count;
+}
+
+optional<Vec2Int> GameState::getStep(Entity& myEntity, Vec2Int& dest) {
+    queue<Vec2Int> q;
+    unordered_map<Vec2Int, Vec2Int> visited;
+    q.push(myEntity.position);
+    visited[myEntity.position] = myEntity.position;
+
+    while (!q.empty()) {
+        Vec2Int v = q.front();
+        q.pop();
+
+        for (uint i = 0; i < 4; ++i) {
+            Vec2Int to(v.x + dx[i], v.y + dy[i]);
+            if (isOutOfMap(to, mapSize) || visited.count(to)) {
+                continue;
+            }
+
+            if (to == dest) {
+                visited[to] = v;
+                while (visited[to] != myEntity.position) {
+                    to = visited[to];
+                }
+                if (enemyAttackMap.getValue(to) > 0) {
+                    return to;
+                } else {
+                    return {};
+                }
+            } else if (gameMap[to.x][to.y] == -1) {
+                visited[to] = v;
+                q.push(to);
+            }
+        }
+    }
+
+    return {};
 }
