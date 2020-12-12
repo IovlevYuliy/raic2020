@@ -23,7 +23,7 @@ const float MAX_BUILDERS_PERCENTAGE = 0.4;
 const int MAX_TURRET = 30;
 const int MAX_RANGED_BASE = 1;
 const int MAX_BUILDER_BASE = 1;
-const int MAX_BUILDERS = 45;
+const int MAX_BUILDERS = 60;
 const int BUILDER_DELAY_TICKS = 10;
 const int DEFENSE_THRESHOLD = 20;
 const int RESOURCE_THRESHOLD = 100;
@@ -79,6 +79,26 @@ inline bool isUnit(const Entity& entry) {
 
 inline bool isUnit(const EntityType type) {
     return type == EntityType::BUILDER_UNIT || type == EntityType::RANGED_UNIT || type == EntityType::MELEE_UNIT;
+}
+
+inline vector<Vec2Int> getBuildingBorder(Vec2Int& pos, int size) {
+    vector<Vec2Int> borders;
+    if (size == 1) {
+        borders.push_back(pos);
+        return borders;
+    }
+
+    for (uint i = pos.x; i < pos.x + size; ++i) {
+        borders.push_back(Vec2Int(i, pos.y - 1));
+        borders.push_back(Vec2Int(i, pos.y + size));
+    }
+
+    for (uint i = pos.y; i < pos.y + size; ++i) {
+        borders.push_back(Vec2Int(pos.x - 1, i));
+        borders.push_back(Vec2Int(pos.x + size, i));
+    }
+
+    return borders;
 }
 
 inline vector<Vec2Int> getBorder(Vec2Int pos, int size) {

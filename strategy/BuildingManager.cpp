@@ -85,7 +85,7 @@ vector<pair<Entity*, Vec2Int>> BuildingManager::getNearestBuilders(Vec2Int pos, 
 
     count = min(count, static_cast<uint>(q.size()));
     vector<pair<Entity*, Vec2Int>> builders;
-    auto borders = getBorder(pos, size);
+    auto borders = getBuildingBorder(pos, size);
     vector<bool> used(borders.size(), false);
     for (int i = 0; i < count; ++i) {
         if (i && q[i].first > 100) {
@@ -94,7 +94,7 @@ vector<pair<Entity*, Vec2Int>> BuildingManager::getNearestBuilders(Vec2Int pos, 
         uint minDist = 1e9;
         uint ind = -1;
         for (uint j = 0; j < static_cast<uint>(borders.size()); ++j) {
-            if (used[j] || isOutOfMap(borders[j], state->mapSize)) {
+            if (used[j] || isOutOfMap(borders[j], state->mapSize) || state->gameMap[borders[j].x][borders[j].y] != -1) {
                 continue;
             }
             auto dist = borders[j].dist(state->myBuilders[q[i].second].position);

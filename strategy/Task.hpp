@@ -13,7 +13,7 @@ class Task {
 
     Task();
 
-    Task(optional<Vec2Int> pos_, EntityType type_, int ttl_ = 50);
+    Task(optional<Vec2Int> pos_, EntityType type_, int ttl_ = 20);
 };
 
 #endif

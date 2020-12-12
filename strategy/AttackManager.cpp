@@ -5,8 +5,18 @@ AttackManager::AttackManager() {
 }
 
 void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction>& actions) {
-    if (isBuilder(myEntity) && state->remainingResources) {
-        goToResources(myEntity, actions);
+    if (isBuilder(myEntity)) {
+        if (state->remainingResources) {
+            goToResources(myEntity, actions);
+        } else {
+            actions[myEntity.id] = EntityAction(
+                MoveAction(Vec2Int(0, 0), true, false),
+                AttackAction(
+                    {},
+                    AutoAttack(1, vector<EntityType>())
+                )
+            );
+        }
         return;
     }
 
