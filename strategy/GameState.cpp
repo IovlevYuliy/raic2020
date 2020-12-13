@@ -272,11 +272,7 @@ optional<Vec2Int> GameState::getStep(Entity& myEntity, Vec2Int& dest) {
                 while (visited[to] != myEntity.position) {
                     to = visited[to];
                 }
-                if (enemyAttackMap.getValue(to) > 0) {
-                    return to;
-                } else {
-                    return {};
-                }
+                return to;
             } else if (gameMap[to.x][to.y] == -1) {
                 visited[to] = v;
                 q.push(to);
@@ -285,4 +281,20 @@ optional<Vec2Int> GameState::getStep(Entity& myEntity, Vec2Int& dest) {
     }
 
     return {};
+}
+
+int GameState::getAlliesAround(Vec2Int& pos, int threshold) {
+    int cnt = 0;
+    for (int i = pos.x - threshold; i <= pos.x + threshold; ++i) {
+        for (int j = pos.y - threshold; j <= pos.y + threshold; ++j) {
+            Vec2Int cur(i, j);
+            if (isOutOfMap(cur, mapSize)) {
+                continue;
+            }
+            if (gameMap[i][j] == EntityType::RANGED_UNIT || gameMap[i][j] == EntityType::MELEE_UNIT) {
+                cnt++;
+            }
+        }
+    }
+    return cnt;
 }

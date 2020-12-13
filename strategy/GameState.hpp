@@ -70,6 +70,8 @@ public:
     int calcBuilders(Vec2Int& pos, int radius);
 
     optional<Vec2Int> getStep(Entity& myEntity, Vec2Int& dest);
+
+    int getAlliesAround(Vec2Int& pos, int threshold);
 };
 
 #endif

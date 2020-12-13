@@ -17,10 +17,14 @@ optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& 
     if (place) {
         auto builders = getNearestBuilders(place.value(), repairBuilderCount[buildingType] + 2, size);
         for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
-            builders[i].first->busy = true;
-            actions[builders[i].first->id] = EntityAction(
-                MoveAction(builders[i].second, true, false),
-                BuildAction(buildingType, place.value()));
+            auto step = state->getStep(*(builders[i].first), builders[i].second);
+            if (step) {
+                builders[i].first->busy = true;
+                actions[builders[i].first->id] = EntityAction(
+                    MoveAction(step.value(), true, false),
+                    BuildAction(buildingType, place.value())
+                );
+            }
         }
     }
 
@@ -62,12 +66,15 @@ void BuildingManager::repairBuildings(unordered_map<int, EntityAction>& actions)
         auto builders = getNearestBuilders(entry.position, builderCount,
             state->entityProperties[entry.entityType].size);
         for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
-            builders[i].first->busy = true;
-            actions[builders[i].first->id] = EntityAction(
-                MoveAction(builders[i].second, true, false),
-                {},  // build
-                {},  // attack
-                RepairAction(entry.id));
+            auto step = state->getStep(*(builders[i].first), builders[i].second);
+            if (step) {
+                builders[i].first->busy = true;
+                actions[builders[i].first->id] = EntityAction(
+                    MoveAction(step.value(), true, false),
+                    {},  // build
+                    {},  // attack
+                    RepairAction(entry.id));
+            }
         }
     }
 }

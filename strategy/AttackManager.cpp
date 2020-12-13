@@ -60,6 +60,17 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
     //     cerr << "second target " << targets.second->position.x << ' ' << targets.second->position.y << endl;
     // }
 
+    int allyCount = state->getAlliesAround(myEntity.position, 2);
+    if (allyCount < 2) {
+        auto ally = getNearestAlly(myEntity);
+        if (ally) {
+            actions[myEntity.id] = EntityAction(
+                MoveAction(ally->position, true, true)
+            );
+            return;
+        }
+    }
+
     if (targets.second) {
         actions[myEntity.id] = EntityAction(
             MoveAction(targets.second->position, true, true)
@@ -201,7 +212,7 @@ void AttackManager::goToResources(Entity& myEntity, unordered_map<int, EntityAct
     }
 
     actions[myEntity.id] = EntityAction(
-        {},
+        MoveAction(Vec2Int(0, 0), true, true),
         AttackAction({}, AutoAttack(attackRange, vector<EntityType>()))
     );
 }
