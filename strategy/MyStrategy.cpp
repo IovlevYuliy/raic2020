@@ -27,7 +27,7 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         tasks.push_back(Task(buildingManager->getPlace(EntityType::HOUSE), EntityType::HOUSE));
     }
 
-    if (state->currentTick % 5 == 0 && state->distToBase >= DEFENSE_THRESHOLD &&
+    if (state->currentTick % 4 == 0 &&
             state->myResources >= state->entityProperties[EntityType::TURRET].initialCost &&
             state->turretCount < MAX_TURRET) {
         auto foundPlace = buildingManager->getPlace(EntityType::TURRET);
