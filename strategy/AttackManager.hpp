@@ -7,6 +7,7 @@
 class AttackManager {
 public:
     GameState* state;
+    vector<Vec2Int> corners;
 
     AttackManager();
 

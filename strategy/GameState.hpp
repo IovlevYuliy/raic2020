@@ -44,7 +44,7 @@ public:
     uint builderCost;
 
     uint remainingResources;
-    uint myResources;
+    int myResources;
     uint currentTick;
 
     uint distToBase;

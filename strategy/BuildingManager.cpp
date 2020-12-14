@@ -9,13 +9,12 @@ optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& 
         return {};
     }
 
-    uint size = state->entityProperties[buildingType].size;
     if (!place) {
         place = getPlace(buildingType);
     }
 
     if (place) {
-        auto builders = getNearestBuilders(place.value(), repairBuilderCount[buildingType] + 2, size);
+        auto builders = getNearestBuilders(place.value(), buildingType, repairBuilderCount[buildingType] + 2);
         for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
             auto step = state->getStep(*(builders[i].first), builders[i].second);
             if (step) {
@@ -41,8 +40,8 @@ optional<Vec2Int> BuildingManager::getPlace(EntityType type) {
     optional<Vec2Int> place;
     if (type == EntityType::TURRET) {
         place = findTurretPlace(state->myBuilders[rand() % state->myBuilders.size()].position, size);
-    } else if (type == EntityType::WALL) {
-        place = findPlace(Vec2Int(rand() % 15, rand() % 15), size, 1);
+    } else if (type == EntityType::RANGED_BASE) {
+        place = findPlace(Vec2Int(0, 0), size, 1);
     } else {
         place = findPlace(Vec2Int(0, 0), size, 4);
     }
@@ -63,8 +62,7 @@ void BuildingManager::repairBuildings(unordered_map<int, EntityAction>& actions)
         // int diffHp = state->entityProperties[entry.entityType].maxHealth - entry.health;
         int builderCount = entry.active ? repairBuilderCount[entry.entityType] :
             repairBuilderCount[entry.entityType] + 2;
-        auto builders = getNearestBuilders(entry.position, builderCount,
-            state->entityProperties[entry.entityType].size);
+        auto builders = getNearestBuilders(entry.position, entry.entityType, builderCount);
         for (uint i = 0; i < static_cast<uint>(builders.size()); ++i) {
             auto step = state->getStep(*(builders[i].first), builders[i].second);
             if (step) {
@@ -79,23 +77,24 @@ void BuildingManager::repairBuildings(unordered_map<int, EntityAction>& actions)
     }
 }
 
-vector<pair<Entity*, Vec2Int>> BuildingManager::getNearestBuilders(Vec2Int pos, uint count, int size) {
+vector<pair<Entity*, Vec2Int>> BuildingManager::getNearestBuilders(Vec2Int pos, EntityType buildingType, uint count) {
     vector<pair<int, int>> q;
     for (uint i = 0; i < static_cast<uint>(state->myBuilders.size()); ++i) {
         if (state->myBuilders[i].busy) {
             continue;
         }
-        uint sqrDist = pos.sqrDist(state->myBuilders[i].position);
-        q.push_back(make_pair(sqrDist, i));
+        auto res = getDistance(state->myBuilders[i], pos, buildingType, state->entityProperties);
+        // uint sqrDist = pos.sqrDist(state->myBuilders[i].position);
+        q.push_back(make_pair(res.first, i));
     }
     sort(q.begin(), q.end());
 
     count = min(count, static_cast<uint>(q.size()));
     vector<pair<Entity*, Vec2Int>> builders;
-    auto borders = getBuildingBorder(pos, size);
+    auto borders = getBuildingBorder(pos, state->entityProperties[buildingType].size);
     vector<bool> used(borders.size(), false);
     for (int i = 0; i < count; ++i) {
-        if (i && q[i].first > 100) {
+        if (i && q[i].first > 10) {
             break;
         }
         uint minDist = 1e9;

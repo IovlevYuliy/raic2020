@@ -140,6 +140,25 @@ inline pair<uint, Vec2Int> getDistance(Entity& e1, Entity& e2, unordered_map<Ent
     return make_pair(minDist, destVec);
 }
 
+inline pair<uint, Vec2Int> getDistance(Entity& e1, Vec2Int& pos, EntityType type, unordered_map<EntityType, EntityProperties>& entityProperties) {
+    vector<Vec2Int> e1Borders = getBorder(e1.position, entityProperties[e1.entityType].size);
+    vector<Vec2Int> e2Borders = getBorder(pos, entityProperties[type].size);
+
+    uint minDist = 1e9;
+    Vec2Int destVec;
+    for (uint i = 0; i < (uint)e1Borders.size(); ++i) {
+        for (uint j = 0; j < (uint)e2Borders.size(); ++j) {
+            uint d = e1Borders[i].dist(e2Borders[j]);
+            if (d < minDist) {
+                minDist = d;
+                destVec = e2Borders[j];
+            }
+        }
+    }
+
+    return make_pair(minDist, destVec);
+}
+
 inline pair<uint, pair<Vec2Int, Entity*>> getNearestTarget(Entity& myEntiry, vector<Entity>& enemies, unordered_map<EntityType, EntityProperties>& entityProperties) {
     uint minDist = 1e9;
     Vec2Int destVec;

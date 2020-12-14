@@ -2,6 +2,11 @@
 
 AttackManager::AttackManager() {
     state = GameState::getState();
+    corners = {
+        Vec2Int(79, 79),
+        Vec2Int(0, 79),
+        Vec2Int(79, 0)
+    };
 }
 
 void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction>& actions) {
@@ -10,12 +15,10 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
             goToResources(myEntity, actions);
         } else {
             actions[myEntity.id] = EntityAction(
-                MoveAction(Vec2Int(0, 0), true, false),
+                MoveAction(Vec2Int(rand() % state->mapSize, rand() % state->mapSize), true, false),
                 AttackAction(
                     {},
-                    AutoAttack(1, vector<EntityType>())
-                )
-            );
+                    AutoAttack(1, vector<EntityType>())));
         }
         return;
     }
@@ -44,13 +47,6 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
         return;
     }
 
-    if (state->currentTick < 300 && (targets.second->position.x > 40 || targets.second->position.y > 40)) {
-        actions[myEntity.id] = EntityAction(
-            MoveAction(Vec2Int(15, 15), true, false)
-        );
-        return;
-    }
-
     // cerr << "my position " << myEntity.position.x << ' ' << myEntity.position.y << endl;
 
     // if (targets.first) {
@@ -60,16 +56,16 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
     //     cerr << "second target " << targets.second->position.x << ' ' << targets.second->position.y << endl;
     // }
 
-    int allyCount = state->getAlliesAround(myEntity.position, 2);
-    if (allyCount < 2) {
-        auto ally = getNearestAlly(myEntity);
-        if (ally) {
-            actions[myEntity.id] = EntityAction(
-                MoveAction(ally->position, true, true)
-            );
-            return;
-        }
-    }
+    // int allyCount = state->getAlliesAround(myEntity.position, 3);
+    // if (allyCount < 2) {
+    //     auto ally = getNearestAlly(myEntity);
+    //     if (ally) {
+    //         actions[myEntity.id] = EntityAction(
+    //             MoveAction(ally->position, true, true)
+    //         );
+    //         return;
+    //     }
+    // }
 
     if (targets.second) {
         actions[myEntity.id] = EntityAction(
@@ -92,8 +88,35 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
         //     }
         // }
     } else {
+        uint ind = 0;
+        uint minDist = 1e9;
+        for (uint i = 0; i < static_cast<uint>(corners.size()); ++i) {
+            uint d = myEntity.position.dist(corners[i]);
+            if (d < 10) {
+                corners.erase(corners.begin() + i);
+            }
+        }
+
+        if (corners.empty()) {
+            actions[myEntity.id] = EntityAction(
+                MoveAction(Vec2Int(rand() % state->mapSize, rand() % state->mapSize), true, false),
+                AttackAction(
+                    {},
+                    AutoAttack(attackRange, vector<EntityType>())));
+            return;
+        }
+
+        for (uint i = 0; i < static_cast<uint>(corners.size()); ++i) {
+            uint d = myEntity.position.dist(corners[i]);
+
+            if (d < minDist) {
+                ind = i;
+                minDist = d;
+            }
+        }
+
         actions[myEntity.id] = EntityAction(
-            MoveAction(corner, true, false),
+            MoveAction(corners[ind], true, true),
             AttackAction(
                 {},
                 AutoAttack(attackRange, vector<EntityType>())
@@ -212,7 +235,7 @@ void AttackManager::goToResources(Entity& myEntity, unordered_map<int, EntityAct
     }
 
     actions[myEntity.id] = EntityAction(
-        MoveAction(Vec2Int(0, 0), true, true),
+        MoveAction(Vec2Int(state->mapSize - 1, 0), true, true),
         AttackAction({}, AutoAttack(attackRange, vector<EntityType>()))
     );
 }
