@@ -1,5 +1,5 @@
 #include "DebugInterface.hpp"
-#include "model/ClientMessage.hpp"
+#include "ClientMessage.hpp"
 
 DebugInterface::DebugInterface(const std::shared_ptr<InputStream>& inputStream, const std::shared_ptr<OutputStream>& outputStream)
     : inputStream(inputStream)

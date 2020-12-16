@@ -1,9 +1,10 @@
-#include "DebugInterface.hpp"
-#include "MyStrategy.hpp"
-#include "stream/TcpStream.hpp"
-#include "model/Model.hpp"
 #include <memory>
 #include <string>
+#include "stream/TcpStream.hpp"
+#include "Model.hpp"
+
+#include "DebugInterface.hpp"
+#include "MyStrategy.hpp"
 
 class Runner {
 public:

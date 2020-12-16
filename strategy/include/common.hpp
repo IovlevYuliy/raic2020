@@ -15,7 +15,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "model/Model.hpp"
+#include "Model.hpp"
 
 using namespace std;
 

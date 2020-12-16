@@ -1,5 +1,5 @@
-#include "MyStrategy.hpp"
 #include <exception>
+#include "MyStrategy.hpp"
 
 MyStrategy::MyStrategy() {
     state = GameState::getState();
