@@ -259,6 +259,10 @@ int GameState::calcBuilders(Vec2Int& pos, int radius) {
 }
 
 optional<Vec2Int> GameState::getStep(Entity& myEntity, Vec2Int& dest) {
+    if (myEntity.position == dest) {
+        return dest;
+    }
+
     queue<Vec2Int> q;
     unordered_map<Vec2Int, Vec2Int> visited;
     q.push(myEntity.position);

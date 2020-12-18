@@ -14,6 +14,11 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
         if (state->remainingResources) {
             goToResources(myEntity, actions);
         } else {
+            if (state->currentTick < 100) {
+                actions[myEntity.id] = EntityAction(
+                    MoveAction(Vec2Int(state->mapSize - 1, state->mapSize - 1), true, false));
+                    return;
+            }
             actions[myEntity.id] = EntityAction(
                 MoveAction(Vec2Int(0, 0), true, false),
                 AttackAction(
@@ -270,7 +275,6 @@ void AttackManager::tryToHealRangers(Entity& myEntity, unordered_map<int, Entity
         }
         auto d = entry.position.dist(myEntity.position);
         if (d == 1) {
-            cerr << "HEAL! " << endl;
             entry.health++;
             actions[myEntity.id] = EntityAction(
                 {}, // mode

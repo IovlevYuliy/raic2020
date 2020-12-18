@@ -117,6 +117,9 @@ void MyStrategy::finishTasks() {
             task.finished = true;
             continue;
         }
+        if (!task.pos) {
+            task.pos = buildingManager->getPlace(task.type);
+        }
         if (task.pos) {
             state->fillGameMap(task.pos.value(), task.type);
         }

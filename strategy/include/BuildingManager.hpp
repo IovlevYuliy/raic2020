@@ -28,7 +28,7 @@ public:
 
     vector<pair<Entity*, Vec2Int>> getNearestBuilders(Vec2Int pos, EntityType buildingType, uint count);
     pair<Vec2Int, Entity> getNearestBuilder(Entity& destEntity);
-    optional<Vec2Int> findPlace(Vec2Int start, uint size, uint divider = 1);
+    optional<Vec2Int> findPlace(Vec2Int start, uint size, uint divider = 1, bool keepDistance = true);
     optional<Vec2Int> findTurretPlace(Vec2Int start, uint size);
     optional<Vec2Int> getPlace(EntityType type);
 };

@@ -21,8 +21,7 @@ optional<int> BuildingManager::createBuilding(unordered_map<int, EntityAction>& 
                 builders[i].first->busy = true;
                 actions[builders[i].first->id] = EntityAction(
                     MoveAction(step.value(), true, false),
-                    BuildAction(buildingType, place.value())
-                );
+                    BuildAction(buildingType, place.value()));
             }
         }
     }
@@ -41,7 +40,7 @@ optional<Vec2Int> BuildingManager::getPlace(EntityType type) {
     if (type == EntityType::TURRET) {
         place = findTurretPlace(state->myBuilders[rand() % state->myBuilders.size()].position, size);
     } else if (type == EntityType::RANGED_BASE) {
-        place = findPlace(Vec2Int(0, 0), size, 1);
+        place = findPlace(Vec2Int(0, 0), size, 1, false);
     } else {
         place = findPlace(Vec2Int(0, 0), size, 4);
     }
@@ -100,7 +99,8 @@ vector<pair<Entity*, Vec2Int>> BuildingManager::getNearestBuilders(Vec2Int pos, 
         uint minDist = 1e9;
         uint ind = -1;
         for (uint j = 0; j < static_cast<uint>(borders.size()); ++j) {
-            if (used[j] || isOutOfMap(borders[j], state->mapSize) || state->gameMap[borders[j].x][borders[j].y] != -1) {
+            if (used[j] || isOutOfMap(borders[j], state->mapSize) ||
+                    (state->gameMap[borders[j].x][borders[j].y] != -1 && state->myBuilders[q[i].second].position != borders[j])) {
                 continue;
             }
             auto dist = borders[j].dist(state->myBuilders[q[i].second].position);
@@ -140,7 +140,7 @@ pair<Vec2Int, Entity> BuildingManager::getNearestBuilder(Entity& destEntity) {
     return make_pair(pos, foundBuilder);
 }
 
-optional<Vec2Int> BuildingManager::findPlace(Vec2Int start, uint size, uint divider) {
+optional<Vec2Int> BuildingManager::findPlace(Vec2Int start, uint size, uint divider, bool keepDistance) {
     uint mapSize = state->mapSize;
 
     queue<Vec2Int> q;
@@ -150,7 +150,7 @@ optional<Vec2Int> BuildingManager::findPlace(Vec2Int start, uint size, uint divi
         Vec2Int v = q.front();
         q.pop();
 
-        bool ok = isFree(v, size) && checkNeighbors(v, size);
+        bool ok = isFree(v, size) && (keepDistance && checkNeighbors(v, size) || !keepDistance);
         if (ok && v.x % divider == 0 && v.y % divider == 0) {
             return v;
         }
