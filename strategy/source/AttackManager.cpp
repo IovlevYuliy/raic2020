@@ -15,7 +15,7 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
             goToResources(myEntity, actions);
         } else {
             actions[myEntity.id] = EntityAction(
-                MoveAction(Vec2Int(rand() % state->mapSize, rand() % state->mapSize), true, false),
+                MoveAction(Vec2Int(0, 0), true, false),
                 AttackAction(
                     {},
                     AutoAttack(1, vector<EntityType>())));
@@ -68,9 +68,15 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
     // }
 
     if (targets.second) {
+        if (isTurret(*targets.second) && targets.second->active) {
+            auto res = getDistance(myEntity, *targets.second, state->entityProperties);
+            if (res.first == attackRange + 1 && !canAttackTurret(*targets.second)) {
+                actions[myEntity.id] = EntityAction();
+                return;
+            }
+        }
         actions[myEntity.id] = EntityAction(
-            MoveAction(targets.second->position, true, true)
-        );
+            MoveAction(targets.second->position, true, true));
         // auto step = getStep(myEntity, targets.second->position);
         // if (step) {
         //     actions[myEntity.id] = EntityAction(
@@ -182,7 +188,7 @@ pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
             targetInRange = &enemy;
         }
 
-        if (dist.first < minDist) {
+        if (dist.first <= minDist) {
             minDist = dist.first;
             nearestTarget = &enemy;
         }
@@ -255,4 +261,48 @@ Entity* AttackManager::getNearestAlly(Entity& myEntity) {
     }
 
     return ally;
+}
+
+void AttackManager::tryToHealRangers(Entity& myEntity, unordered_map<int, EntityAction>& actions) {
+    for (auto& entry : state->mySoldiers) {
+        if (entry.health != 5) {
+            continue;
+        }
+        auto d = entry.position.dist(myEntity.position);
+        if (d == 1) {
+            cerr << "HEAL! " << endl;
+            entry.health++;
+            actions[myEntity.id] = EntityAction(
+                {}, // mode
+                {},  // build
+                {},  // attack
+                RepairAction(entry.id)
+            );
+            return;
+        }
+    }
+}
+
+bool AttackManager::canAttackTurret(Entity& turret) {
+    if (turret.health > 80 && turret.underAttack >= 5) {
+        return true;
+    }
+
+    if (turret.health > 50 && turret.health <= 80 && turret.underAttack >= 4) {
+        return true;
+    }
+
+    if (turret.health > 20 && turret.health < 50 && turret.underAttack >= 3) {
+        return true;
+    }
+
+    if (turret.health > 10 && turret.health <= 20 && turret.underAttack >= 2) {
+        return true;
+    }
+
+    if (turret.health <= 10 && turret.underAttack >= 1) {
+        return true;
+    }
+
+    return false;
 }

@@ -18,6 +18,7 @@ public:
     bool active;
     uint targets;
     int distToBase;
+    uint underAttack = 0;
     bool busy;
     Entity();
     Entity(int id, std::shared_ptr<int> playerId, EntityType entityType, Vec2Int position, int health, bool active);

@@ -63,6 +63,7 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
     for (auto& entry : state->myBuilders) {
         if (!entry.busy) {
             attackManager->goToAttack(entry, actions);
+            attackManager->tryToHealRangers(entry, actions);
         }
     }
     for (auto& entry : state->myBuildings) {

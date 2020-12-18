@@ -21,6 +21,10 @@ public:
     pair<Entity*,Entity*> getTargets(Entity& myEntity);
 
     bool troopIsReady(Entity& myEntity);
+
+    void tryToHealRangers(Entity& myEntity, unordered_map<int, EntityAction>& actions);
+
+    bool canAttackTurret(Entity& turret);
 };
 
 #endif

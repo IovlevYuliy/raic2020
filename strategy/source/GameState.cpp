@@ -152,6 +152,13 @@ void GameState::calcTargets() {
                 entry.targets++;
             }
         }
+
+        for (auto& enemy : enemyBuildings) {
+            auto res = getDistance(enemy, entry, entityProperties);
+            if (res.first <= attackRange + 1) {
+                enemy.underAttack++;
+            }
+        }
     }
     distToBase = 1e9;
     for (auto& entry: myBuildings) {
@@ -185,7 +192,7 @@ void GameState::createInfluenceMaps() {
             enemyAttackMap.fillInfluence(
                 entry,
                 entityProperties[entry.entityType].size,                 // size
-                entityProperties[entry.entityType].attack->attackRange + 1,  // attack range
+                entityProperties[entry.entityType].attack->attackRange,  // attack range
                 myId);
         }
         enemyInfluence.fillInfluence(
@@ -214,7 +221,7 @@ void GameState::createInfluenceMaps() {
             myInfluence.fillInfluence(
                 entry,
                 entityProperties[entry.entityType].size,                     // size
-                entityProperties[entry.entityType].attack->attackRange + 1,  // attack range
+                entityProperties[entry.entityType].attack->attackRange,  // attack range
                 myId);
         }
         myInfluence.fillInfluence(
