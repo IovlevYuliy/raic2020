@@ -32,7 +32,7 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         tasks.push_back(Task(buildingManager->getPlace(EntityType::HOUSE), EntityType::HOUSE));
     }
 
-    if (state->currentTick % 4 == 0 &&
+    if (state->currentTick % 2 == 0 &&
             state->rangedBaseCount &&
             state->myResources >= state->entityProperties[EntityType::TURRET].initialCost &&
             state->turretCount < MAX_TURRET &&

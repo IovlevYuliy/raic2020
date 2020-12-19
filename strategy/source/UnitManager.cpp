@@ -39,8 +39,12 @@ void UnitManager::stop(unordered_map<int, EntityAction>& actions, EntityType uni
 }
 
 void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAction>& actions, bool force) {
-    if ((state->currentTick > 700 && state->curBuilderCount >= 30) ||
+    if ((state->currentTick > 800 && state->curBuilderCount >= 20) ||
+            (state->currentTick > 700 && state->curBuilderCount >= 30) ||
+            (state->currentTick > 500 && state->curBuilderCount >= 40) ||
+            (state->currentTick > 400 && state->curBuilderCount >= 50) ||
             state->currentTick > 900 ||
+            (state->rangedBaseCount < 1 && state->curBuilderCount >= 25) ||
             state->curBuilderCount >= MAX_BUILDERS ||
             state->distToBase <= 5 ||
             state->myResources < state->builderCost) {

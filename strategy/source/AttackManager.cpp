@@ -52,6 +52,12 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
         return;
     }
 
+    if (state->currentTick < 200 && (targets.second->position.x > 40 || targets.second->position.y > 40)) {
+        actions[myEntity.id] = EntityAction(
+            MoveAction(Vec2Int(15, 15), true, false));
+        return;
+    }
+
     // cerr << "my position " << myEntity.position.x << ' ' << myEntity.position.y << endl;
 
     // if (targets.first) {
@@ -153,7 +159,7 @@ pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
             targetInRange = &enemy;
         }
 
-        if (dist < minDist) {
+        if (2 * dist < minDist) {
             minDist = dist;
             nearestTarget = &enemy;
         }
@@ -173,7 +179,7 @@ pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
             targetInRange = &enemy;
         }
 
-        if (dist < minDist) {
+        if (dist <= minDist) {
             minDist = dist;
             nearestTarget = &enemy;
         }
@@ -188,7 +194,7 @@ pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
 
         auto dist = getDistance(myEntity, enemy, state->entityProperties);
 
-        if (enemy.health < minHp && dist.first <= attackRange) {
+        if (enemy.health <= minHp && dist.first <= attackRange) {
             minHp = enemy.health;
             targetInRange = &enemy;
         }
@@ -245,8 +251,20 @@ void AttackManager::goToResources(Entity& myEntity, unordered_map<int, EntityAct
         }
     }
 
+    Vec2Int v(myEntity.position.x, myEntity.position.y);
+    for (uint i = 0; i < 4; ++i) {
+        Vec2Int to(v.x + dx[i], v.y + dy[i]);
+        if (isOutOfMap(to, mapSize) || state->enemyAttackMap.getValue(to) < 0 || state->gameMap[to.x][to.y] != -1) {
+            continue;
+        }
+        actions[myEntity.id] = EntityAction(
+            MoveAction(to, true, true),
+            AttackAction({}, AutoAttack(attackRange, vector<EntityType>()))
+        );
+        return;
+    }
     actions[myEntity.id] = EntityAction(
-        MoveAction(Vec2Int(state->mapSize - 1, 0), true, true),
+        MoveAction(Vec2Int(0, 0), true, true),
         AttackAction({}, AutoAttack(attackRange, vector<EntityType>()))
     );
 }
