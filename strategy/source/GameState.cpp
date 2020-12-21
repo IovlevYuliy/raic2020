@@ -21,6 +21,8 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
 
     calcPopulationStats();
 
+    isFinal = static_cast<uint>(playerView.players.size()) == 2;
+
     myId = playerView.myId;
     for (auto& pl : playerView.players) {
         if (pl.id == myId) {
@@ -34,6 +36,12 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
     });
 
     createInfluenceMaps();
+
+    if (isFinal) {
+        MAX_TURRET = 40;
+        MAX_BUILDERS = 70;
+        MAX_RANGERS = 45;
+    }
 }
 
 void GameState::restoreGameMap(const PlayerView& playerView) {

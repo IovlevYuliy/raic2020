@@ -51,6 +51,13 @@ public:
 
     int myId;
 
+    bool isFinal;
+    int MAX_TURRET = 25;
+    int MAX_RANGED_BASE = 1;
+    int MAX_BUILDER_BASE = 1;
+    int MAX_BUILDERS = 60;
+    int MAX_RANGERS = 40;
+
     static GameState* getState();
 
     void parsePlayerView(const PlayerView& playerView);

@@ -19,15 +19,6 @@
 
 using namespace std;
 
-const float MAX_BUILDERS_PERCENTAGE = 0.4;
-const int MAX_TURRET = 25;
-const int MAX_RANGED_BASE = 1;
-const int MAX_BUILDER_BASE = 1;
-const int MAX_BUILDERS = 60;
-const int BUILDER_DELAY_TICKS = 10;
-const int DEFENSE_THRESHOLD = 20;
-const int RESOURCE_THRESHOLD = 100;
-
 const int dx[4] = {0, 0, 1, -1};
 const int dy[4] = {1, -1, 0, 0};
 

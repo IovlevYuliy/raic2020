@@ -39,13 +39,16 @@ void UnitManager::stop(unordered_map<int, EntityAction>& actions, EntityType uni
 }
 
 void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAction>& actions, bool force) {
-    if ((state->currentTick > 800 && state->curBuilderCount >= 20) ||
-            (state->currentTick > 700 && state->curBuilderCount >= 30) ||
-            (state->currentTick > 500 && state->curBuilderCount >= 40) ||
-            (state->currentTick > 400 && state->curBuilderCount >= 50) ||
+    if ((state->currentTick > 800 && state->curBuilderCount >= 20 && !state->isFinal) ||
+            (state->currentTick > 700 && state->curBuilderCount >= 30 && !state->isFinal) ||
+            (state->currentTick > 500 && state->curBuilderCount >= 40 && !state->isFinal) ||
+            (state->currentTick > 400 && state->curBuilderCount >= 50 && !state->isFinal) ||
             state->currentTick > 900 ||
+            (state->currentTick > 500 && state->curBuilderCount >= 60 && state->isFinal) ||
+            (state->currentTick > 700 && state->curBuilderCount >= 40 && state->isFinal) ||
+            (state->currentTick > 800 && state->curBuilderCount >= 30 && state->isFinal) ||
             (state->rangedBaseCount < 1 && state->curBuilderCount >= 25) ||
-            state->curBuilderCount >= MAX_BUILDERS ||
+            state->curBuilderCount >= state->MAX_BUILDERS ||
             state->distToBase <= 5 ||
             state->myResources < state->builderCost) {
         actions[builderBase.id] = EntityAction();
@@ -64,7 +67,8 @@ void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAc
 }
 
 void UnitManager::createRanger(Entity& rangerBase, unordered_map<int, EntityAction>& actions) {
-    if (state->myResources < state->rangerCost) {
+    if (state->myResources < state->rangerCost ||
+        state->curRangerCount >= state->MAX_RANGERS) {
         actions[rangerBase.id] = EntityAction();
         return;
     }
@@ -97,16 +101,11 @@ void UnitManager::createMelee(Entity& meleeBase, unordered_map<int, EntityAction
 
 Vec2Int UnitManager::getPosition(Entity& base) {
     uint baseSize = state->entityProperties[base.entityType].size;
-    Vec2Int pos(base.position.x - 1, base.position.y - 1);
-    auto borders = getBorder(pos, baseSize + 2);
+    auto borders = getBuildingBorder(base.position, baseSize);
     random_shuffle(borders.begin(), borders.end());
     for (auto vec: borders) {
-        if (isOutOfMap(vec, state->mapSize) || state->gameMap[vec.x][vec.y] != -1 ||
-            vec == Vec2Int(base.position.x - 1, base.position.y - 1) ||
-            vec == Vec2Int(base.position.x - 1, base.position.y + baseSize) ||
-            vec == Vec2Int(base.position.x + baseSize, base.position.y - 1) ||
-            vec == Vec2Int(base.position.x + baseSize, base.position.y + baseSize)) {
-                continue;
+        if (isOutOfMap(vec, state->mapSize) || state->gameMap[vec.x][vec.y] != -1) {
+            continue;
         }
         return vec;
     }
