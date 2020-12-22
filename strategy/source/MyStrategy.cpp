@@ -15,7 +15,7 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
 
     unordered_map<int, EntityAction> actions;
     // if (debugInterface) {
-    //     state->influenceMap.draw(debugInterface);
+        // state->myInfluence.drawColor(debugInterface);
     // }
 
     finishTasks();
@@ -59,6 +59,17 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
 
     executeTasks(actions);
 
+    // simulation of enemy attacks
+    for (auto& entry : state->enemySoldiers) {
+        attackManager->simEnemyAttack(entry);
+    }
+    for (auto& entry : state->enemyBuildings) {
+        if (isTurret(entry)) {
+            attackManager->simEnemyAttack(entry);
+        }
+    }
+
+    // my attacks
     for (auto& entry : state->mySoldiers) {
         attackManager->goToAttack(entry, actions);
     }

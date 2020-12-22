@@ -43,6 +43,10 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
         return;
     }
 
+    if (killOwnUnits(myEntity, actions)) {
+        return;
+    }
+
     if (isTurret(myEntity)) {
         actions[myEntity.id] = EntityAction(
             {},
@@ -93,6 +97,9 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
         //     actions[myEntity.id] = EntityAction(
         //         MoveAction(step.value(), true, true)
         //     );
+        // } else  {
+        //     actions[myEntity.id] = EntityAction();
+        // }
         // } else {
         //     auto ally = getNearestAlly(myEntity);
         //     if (ally) {
@@ -105,6 +112,18 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
         //     }
         // }
     } else {
+        if (state->isFinal) {
+            actions[myEntity.id] = EntityAction(
+                MoveAction(corners[0], true, true),
+                AttackAction(
+                    {},
+                    AutoAttack(attackRange, vector<EntityType>())
+                )
+            );
+
+            return;
+        }
+
         uint ind = 0;
         uint minDist = 1e9;
         for (uint i = 0; i < static_cast<uint>(corners.size()); ++i) {
@@ -327,4 +346,160 @@ bool AttackManager::canAttackTurret(Entity& turret) {
     }
 
     return false;
+}
+
+optional<Vec2Int> AttackManager::getStep(Entity& myEntity, Vec2Int& dest) {
+    if (myEntity.position == dest) {
+        return dest;
+    }
+
+    queue<Vec2Int> q;
+    unordered_map<Vec2Int, Vec2Int> visited;
+    q.push(myEntity.position);
+    visited[myEntity.position] = myEntity.position;
+    uint dist = myEntity.position.dist(dest);
+
+    while (!q.empty()) {
+        Vec2Int v = q.front();
+        q.pop();
+
+        for (uint i = 0; i < 4; ++i) {
+            Vec2Int to(v.x + dx[i], v.y + dy[i]);
+            if (isOutOfMap(to, state->mapSize) || visited.count(to)) {
+                continue;
+            }
+
+            if (to == dest) {
+                visited[to] = v;
+                while (visited[to] != myEntity.position) {
+                    to = visited[to];
+                }
+                if (state->myInfluence.getValue(to) > abs(state->enemyAttackMap.getValue(to))) {
+                    return to;
+                }
+                return {};
+            } else if (state->gameMap[to.x][to.y] == -1 || (dist >= 20 && state->gameMap[to.x][to.y] == EntityType::RANGED_UNIT)) {
+                visited[to] = v;
+                q.push(to);
+            }
+        }
+    }
+
+    return {};
+}
+
+void AttackManager::simEnemyAttack(Entity& enemy) {
+    uint attackRange = state->entityProperties[enemy.entityType].attack->attackRange;
+    uint damage = state->entityProperties[enemy.entityType].attack->damage;
+
+    Entity* targetInRange = NULL;
+    uint minHp = 1e9;
+
+    for (auto& myEntry : state->mySoldiers) {
+        if (myEntry.health <= 0) continue;
+
+        uint dist = getDistance(enemy, myEntry, state->entityProperties).first;
+
+        if (myEntry.health < minHp && dist <= attackRange) {
+            minHp = myEntry.health;
+            targetInRange = &myEntry;
+        }
+    }
+
+    if (targetInRange) {
+        targetInRange->health -= damage;
+        return;
+    }
+
+    for (auto& myEntry : state->myBuilders) {
+        if (myEntry.health <= 0) continue;
+
+        uint dist = getDistance(enemy, myEntry, state->entityProperties).first;
+
+        if (myEntry.health < minHp && dist <= attackRange) {
+            minHp = myEntry.health;
+            targetInRange = &myEntry;
+        }
+    }
+
+    if (targetInRange) {
+        targetInRange->health -= damage;
+        return;
+    }
+
+    for (auto& myEntry : state->myBuildings) {
+        if (myEntry.health <= 0) continue;
+
+        auto dist = getDistance(myEntry, enemy, state->entityProperties);
+
+        if (myEntry.health <= minHp && dist.first <= attackRange) {
+            minHp = myEntry.health;
+            targetInRange = &myEntry;
+        }
+    }
+
+    if (targetInRange) {
+        targetInRange->health -= damage;
+        return;
+    }
+}
+
+bool AttackManager::killOwnUnits(Entity& myEntity, unordered_map<int, EntityAction>& actions) {
+    uint attackRange = state->entityProperties[myEntity.entityType].attack->attackRange;
+
+    Entity* target = NULL;
+    vector<Entity*> targets;
+    for (auto& myEntry : state->mySoldiers) {
+        if (myEntry.health > 0) continue;
+
+        uint dist = getDistance(myEntry, myEntity, state->entityProperties).first;
+
+        if (dist <= attackRange && !myEntry.isKilled) {
+            target = &myEntry;
+        }
+        if (dist <= attackRange && myEntry.isKilled) {
+            targets.push_back(&myEntry);
+        }
+    }
+
+    if (target) {
+        target->isKilled = true;
+        actions[myEntity.id] = EntityAction(
+            {},
+            AttackAction(target->id, {}));
+        return true;
+    }
+
+    for (auto& myEntry : state->myBuildings) {
+        if (myEntry.health > 0) continue;
+
+        uint dist = getDistance(myEntry, myEntity, state->entityProperties).first;
+
+        if (dist <= attackRange && !myEntry.isKilled) {
+            target = &myEntry;
+        }
+        if (dist <= attackRange && myEntry.isKilled) {
+            targets.push_back(&myEntry);
+        }
+    }
+
+    if (target) {
+        target->isKilled = true;
+        actions[myEntity.id] = EntityAction(
+            {},
+            AttackAction(target->id, {})
+        );
+        return true;
+    }
+
+    if (targets.empty()) {
+        return false;
+    }
+
+    uint ind = rand() % targets.size();
+    actions[myEntity.id] = EntityAction(
+        {},
+        AttackAction(targets[ind]->id, {}));
+
+    return true;
 }

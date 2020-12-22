@@ -48,6 +48,7 @@ void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAc
             (state->currentTick > 700 && state->curBuilderCount >= 40 && state->isFinal) ||
             (state->currentTick > 800 && state->curBuilderCount >= 30 && state->isFinal) ||
             (state->rangedBaseCount < 1 && state->curBuilderCount >= 25) ||
+            (state->curBuilderCount >= 40 && state->curRangerCount < 20) ||
             state->curBuilderCount >= state->MAX_BUILDERS ||
             state->distToBase <= 5 ||
             state->myResources < state->builderCost) {

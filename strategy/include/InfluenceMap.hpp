@@ -130,7 +130,7 @@ class InfluenceMap {
         return sum;
     }
 
-    void draw(DebugInterface* debugInterface) {
+    void drawColor(DebugInterface* debugInterface) {
         for (uint i = 0; i < mapSize - 1; ++i) {
             for (uint j = 0; j < mapSize - 1; ++j) {
                 auto dc = DebugCommand::Add(shared_ptr<DebugData>(new DebugData::Primitives(

@@ -35,12 +35,16 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
         return x.targets < y.targets;
     });
 
+    sort(enemySoldiers.begin(), enemySoldiers.end(), [](Entity& x, Entity& y) {
+        return x.targets < y.targets;
+    });
+
     createInfluenceMaps();
 
     if (isFinal) {
         MAX_TURRET = 40;
         MAX_BUILDERS = 70;
-        MAX_RANGERS = 45;
+        MAX_RANGERS = 50;
     }
 }
 
@@ -153,6 +157,7 @@ void GameState::calcTargets() {
         for (auto& enemy: enemySoldiers) {
             if(entry.position.dist(enemy.position) <= attackRange) {
                 entry.targets++;
+                enemy.targets++;
             }
         }
         for (auto& enemy: enemyBuilders) {
@@ -292,7 +297,7 @@ optional<Vec2Int> GameState::getStep(Entity& myEntity, Vec2Int& dest) {
                     to = visited[to];
                 }
                 return to;
-            } else if (gameMap[to.x][to.y] == -1) {
+            } else if (gameMap[to.x][to.y] == -1 || gameMap[to.x][to.y] == EntityType::RANGED_UNIT) {
                 visited[to] = v;
                 q.push(to);
             }

@@ -16,10 +16,11 @@ public:
     Vec2Int position;
     int health;
     bool active;
-    uint targets;
+    uint targets = 0;
     int distToBase;
     uint underAttack = 0;
     bool busy;
+    bool isKilled = false;
     Entity();
     Entity(int id, std::shared_ptr<int> playerId, EntityType entityType, Vec2Int position, int health, bool active);
     static Entity readFrom(InputStream& stream);

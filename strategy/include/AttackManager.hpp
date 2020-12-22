@@ -25,6 +25,10 @@ public:
     void tryToHealRangers(Entity& myEntity, unordered_map<int, EntityAction>& actions);
 
     bool canAttackTurret(Entity& turret);
+
+    void simEnemyAttack(Entity& enemy);
+
+    bool killOwnUnits(Entity& myEntity, unordered_map<int, EntityAction>& actions);
 };
 
 #endif
