@@ -40,9 +40,9 @@ optional<Vec2Int> BuildingManager::getPlace(EntityType type) {
     if (type == EntityType::TURRET) {
         place = findTurretPlace(state->myBuilders[rand() % state->myBuilders.size()].position, size);
     } else if (type == EntityType::RANGED_BASE) {
-        place = findPlace(state->myBuilders[rand() % state->myBuilders.size()].position, size, 1, false);
+        place = findPlace(Vec2Int(0, 0), size, 1, false);
     } else {
-        place = findPlace(Vec2Int(0, 0), size, 4);
+        place = findPlace(Vec2Int(0, 0), size, 4, true);
     }
 
     return place;
@@ -149,7 +149,6 @@ optional<Vec2Int> BuildingManager::findPlace(Vec2Int start, uint size, uint divi
     while (!q.empty()) {
         Vec2Int v = q.front();
         q.pop();
-
         bool ok = isFree(v, size) && (keepDistance && checkNeighbors(v, size) || !keepDistance);
         if (ok && v.x % divider == 0 && v.y % divider == 0) {
             return v;

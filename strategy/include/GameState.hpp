@@ -21,6 +21,7 @@ public:
     vector<Entity> enemyBuildings;
 
     vector<vector<char>> gameMap;
+    vector<vector<int>> idsMap;
     InfluenceMap enemyAttackMap;
     InfluenceMap enemyInfluence;
     InfluenceMap myInfluence;
@@ -52,11 +53,11 @@ public:
     int myId;
 
     bool isFinal;
-    int MAX_TURRET = 25;
+    int MAX_TURRET = 0;
     int MAX_RANGED_BASE = 1;
     int MAX_BUILDER_BASE = 1;
     int MAX_BUILDERS = 60;
-    int MAX_RANGERS = 40;
+    int MAX_RANGERS = 50;
 
     static GameState* getState();
 
@@ -65,6 +66,8 @@ public:
     void restoreGameMap(const PlayerView& playerView);
 
     void createInfluenceMaps();
+
+    void fillGameMap(const Entity& entry);
 
     void fillGameMap(const Vec2Int& pos, EntityType type);
 

@@ -42,9 +42,9 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
     createInfluenceMaps();
 
     if (isFinal) {
-        MAX_TURRET = 40;
         MAX_BUILDERS = 70;
-        MAX_RANGERS = 50;
+        MAX_RANGERS = 60;
+        MAX_TURRET = 25;
     }
 }
 
@@ -58,8 +58,21 @@ void GameState::restoreGameMap(const PlayerView& playerView) {
     gameMap.resize(mapSize);
     gameMap.assign(mapSize, vector<char>(mapSize, -1));
 
+    idsMap.resize(mapSize);
+    idsMap.assign(mapSize, vector<int>(mapSize, -1));
+
     for (auto& entry: playerView.entities) {
-        fillGameMap(entry.position, entry.entityType);
+        fillGameMap(entry);
+    }
+}
+
+void GameState::fillGameMap(const Entity& entry) {
+    uint size = entityProperties[entry.entityType].size;
+    for (int i = entry.position.x; i < entry.position.x + size; ++i) {
+        for (int j = entry.position.y; j < entry.position.y + size; ++j) {
+            gameMap[i][j] = entry.entityType;
+            idsMap[i][j] = entry.id;
+        }
     }
 }
 

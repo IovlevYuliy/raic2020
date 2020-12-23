@@ -58,7 +58,13 @@ void AttackManager::goToAttack(Entity& myEntity, unordered_map<int, EntityAction
 
     if (state->currentTick < 200 && (targets.second->position.x > 40 || targets.second->position.y > 40)) {
         actions[myEntity.id] = EntityAction(
-            MoveAction(Vec2Int(15, 15), true, false));
+            MoveAction(Vec2Int(15, 15), true, true));
+        return;
+    }
+
+    if (state->currentTick < 400 && state->isFinal) {
+        actions[myEntity.id] = EntityAction(
+            MoveAction(Vec2Int(40, 40), true, true));
         return;
     }
 
@@ -254,14 +260,14 @@ void AttackManager::goToResources(Entity& myEntity, unordered_map<int, EntityAct
                     state->myResources++;
                     actions[myEntity.id] = EntityAction(
                         {},
-                        AttackAction(
-                            {},
-                            AutoAttack(attackRange, vector<EntityType>{EntityType::RESOURCE, EntityType::BUILDER_UNIT})
-                        )
+                        AttackAction(state->idsMap[to.x][to.y], {})
                     );
                     return;
                 }
-                actions[myEntity.id] = EntityAction(MoveAction(to, true, false));
+                actions[myEntity.id] = EntityAction(
+                    MoveAction(to, true, false),
+                    AttackAction({}, AutoAttack(attackRange, vector<EntityType>()))
+                );
                 return;
             } else if (state->gameMap[to.x][to.y] == -1) {
                 visited[to] = v;
@@ -378,7 +384,7 @@ optional<Vec2Int> AttackManager::getStep(Entity& myEntity, Vec2Int& dest) {
                     return to;
                 }
                 return {};
-            } else if (state->gameMap[to.x][to.y] == -1 || (dist >= 20 && state->gameMap[to.x][to.y] == EntityType::RANGED_UNIT)) {
+            } else if (state->gameMap[to.x][to.y] == -1 || (dist >= 10 && state->gameMap[to.x][to.y] == EntityType::RANGED_UNIT)) {
                 visited[to] = v;
                 q.push(to);
             }
