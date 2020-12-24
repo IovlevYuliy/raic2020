@@ -53,7 +53,7 @@ public:
     int myId;
 
     bool isFinal;
-    int MAX_TURRET = 0;
+    int MAX_TURRET = 25;
     int MAX_RANGED_BASE = 1;
     int MAX_BUILDER_BASE = 1;
     int MAX_BUILDERS = 60;

@@ -40,7 +40,7 @@ optional<Vec2Int> BuildingManager::getPlace(EntityType type) {
     if (type == EntityType::TURRET) {
         place = findTurretPlace(state->myBuilders[rand() % state->myBuilders.size()].position, size);
     } else if (type == EntityType::RANGED_BASE) {
-        place = findPlace(Vec2Int(0, 0), size, 1, false);
+        place = findPlace(state->myBuilders[rand() % state->myBuilders.size()].position, size, 1, false);
     } else {
         place = findPlace(Vec2Int(0, 0), size, 4, true);
     }

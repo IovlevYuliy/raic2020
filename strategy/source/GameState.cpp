@@ -194,6 +194,22 @@ void GameState::calcTargets() {
             distToBase = min(res.first, distToBase);
         }
     }
+
+    for (auto& enemy : enemySoldiers) {
+        uint attackRange = entityProperties[enemy.entityType].attack->attackRange;
+        for (auto& entry : myBuildings) {
+            auto res = getDistance(enemy, entry, entityProperties);
+            if (res.first <= attackRange) {
+                enemy.targets++;
+            }
+        }
+        for (auto& entry : myBuilders) {
+            auto res = getDistance(enemy, entry, entityProperties);
+            if (res.first <= attackRange) {
+                enemy.targets++;
+            }
+        }
+    }
 }
 
 void GameState::createInfluenceMaps() {
