@@ -184,7 +184,7 @@ pair<Entity*, Entity*> AttackManager::getTargets(Entity& myEntity) {
             targetInRange = &enemy;
         }
 
-        if (2 * dist < minDist) {
+        if (dist < minDist) {
             minDist = dist;
             nearestTarget = &enemy;
         }

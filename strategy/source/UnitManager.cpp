@@ -43,14 +43,14 @@ void UnitManager::createBuilder(Entity& builderBase, unordered_map<int, EntityAc
             (state->currentTick > 700 && state->curBuilderCount >= 30 && !state->isFinal) ||
             (state->currentTick > 500 && state->curBuilderCount >= 40 && !state->isFinal) ||
             (state->currentTick > 400 && state->curBuilderCount >= 50 && !state->isFinal) ||
-            state->currentTick > 900 ||
+            state->currentTick > 850 ||
             (state->currentTick > 500 && state->curBuilderCount >= 60 && state->isFinal) ||
             (state->currentTick > 700 && state->curBuilderCount >= 40 && state->isFinal) ||
             (state->currentTick > 800 && state->curBuilderCount >= 30 && state->isFinal) ||
             (state->rangedBaseCount < 1 && state->curBuilderCount >= 25) ||
-            (state->curBuilderCount >= 40 && state->curRangerCount < 20) ||
+            (state->curBuilderCount >= 35 && state->curRangerCount < 20) ||
             state->curBuilderCount >= state->MAX_BUILDERS ||
-            state->distToBase <= 5 ||
+            state->distToBase <= 10 ||
             state->myResources < state->builderCost) {
         actions[builderBase.id] = EntityAction();
         return;
@@ -103,7 +103,7 @@ void UnitManager::createMelee(Entity& meleeBase, unordered_map<int, EntityAction
 Vec2Int UnitManager::getPosition(Entity& base) {
     uint baseSize = state->entityProperties[base.entityType].size;
     auto borders = getBuildingBorder(base.position, baseSize);
-    random_shuffle(borders.begin(), borders.end());
+    // random_shuffle(borders.begin(), borders.end());
     for (auto vec: borders) {
         if (isOutOfMap(vec, state->mapSize) || state->gameMap[vec.x][vec.y] != -1) {
             continue;

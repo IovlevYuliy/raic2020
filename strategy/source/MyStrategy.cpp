@@ -31,11 +31,10 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
         tasks.push_back(Task(buildingManager->getPlace(EntityType::HOUSE), EntityType::HOUSE));
     }
 
-    if (state->currentTick % 2 == 0 &&
-            state->rangedBaseCount &&
+    if (state->rangedBaseCount &&
             state->myResources >= state->entityProperties[EntityType::TURRET].initialCost &&
             state->turretCount < state->MAX_TURRET &&
-            ((state->turretCount < state->currentTick / 150 * 5 && !state->isFinal) ||
+            ((state->turretCount < state->currentTick / 140 * 4 && !state->isFinal) ||
             (state->turretCount < state->currentTick / 100 * 3 && state->isFinal))
     ) {
         auto foundPlace = buildingManager->getPlace(EntityType::TURRET);
@@ -159,8 +158,18 @@ void MyStrategy::executeTasks(unordered_map<int, EntityAction>& actions) {
             continue;
         }
 
-        if (state->myResources >= 0) {
-            buildingManager->createBuilding(actions, task.type, task.pos);
+        if (state->existResources >= state->entityProperties[task.type].initialCost) {
+            if (!task.pos) {
+                task.pos = buildingManager->getPlace(task.type);
+            }
+            if (task.pos) {
+                state->fillGameMap(task.pos.value(), task.type);
+                buildingManager->createBuilding(actions, task.type, task.pos);
+            } else {
+                break;
+            }
+        } else {
+            break;
         }
     }
 }

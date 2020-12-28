@@ -46,6 +46,7 @@ public:
 
     uint remainingResources;
     int myResources;
+    int existResources;
     uint currentTick;
 
     uint distToBase;
@@ -53,7 +54,7 @@ public:
     int myId;
 
     bool isFinal;
-    int MAX_TURRET = 25;
+    int MAX_TURRET = 20;
     int MAX_RANGED_BASE = 1;
     int MAX_BUILDER_BASE = 1;
     int MAX_BUILDERS = 60;

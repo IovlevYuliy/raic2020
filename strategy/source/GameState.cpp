@@ -27,6 +27,7 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
     for (auto& pl : playerView.players) {
         if (pl.id == myId) {
             myResources = pl.resource;
+            existResources = pl.resource;
         }
     }
 
@@ -43,7 +44,7 @@ void GameState::parsePlayerView(const PlayerView& playerView) {
 
     if (isFinal) {
         MAX_BUILDERS = 70;
-        MAX_RANGERS = 60;
+        MAX_RANGERS = 70;
         MAX_TURRET = 25;
     }
 }
